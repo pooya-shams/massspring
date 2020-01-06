@@ -33,7 +33,6 @@ az0 = 0 # acceleration in z direction; measured in m*s^-2 where m is meters, s i
 ge = 9.8 # earth's gravity acceleration; measured in m*s^-2
 
 # programming variables
-NM = 0 # number of masses
 mass_lis   = [] # list of all masses
 spring_lis = [] # list of all springs
 gravity_lis = [] # list of all gravity forces
@@ -95,7 +94,6 @@ class mass(object):
 		conductive means if the object will share electrical charge with others or not
 		color is the objects default color | visible means if the object is seen or not
 		"""
-		global NM
 		if m == 0:
 			raise ZeroMass("Can't produce an object with zero mass")
 		if m < 0:
@@ -126,7 +124,6 @@ class mass(object):
 		self.color = color
 		self.visible = visible
 		mass_lis.append(self)
-		NM += 1
 
 	def _index(self):
 		""" returns the index of the object in the mass_lis """
@@ -137,9 +134,7 @@ class mass(object):
 	def __del__(self):
 		""" deletes the mass and removes it from mass list """
 		try:
-			global NM
 			mass_lis.pop(self._index())
-			NM -= 1
 		except Exception as e:
 			print("[!] Error when deleting : "+str(e))
 
@@ -292,16 +287,16 @@ class spring(force):
 		self.visible = visible
 		spring_lis.append(self)
 
-	# def _index(self):
-	# 	for i, spring in enumerate(spring_lis):
-	# 		if spring == self:
-	# 			return i
+	def _index(self):
+		for i, spring in enumerate(spring_lis):
+			if spring == self:
+				return i
 
-	# def __del__(self):
-	# 	try:
-	# 		spring_lis.pop(self._index())
-	# 	except Exception as e:
-	# 		print("[!] Error when deleting : "+str(e))
+	def __del__(self):
+		try:
+			spring_lis.pop(self._index())
+		except Exception as e:
+			print("[!] Error when deleting : "+str(e))
 
 	def length(self):
 		return self.h()
@@ -560,4 +555,3 @@ def mainloop(speed=2, FPS=0, frame=None, *args):
 			DISPLAYSURF.fill((0, 0, 0))
 			show_all(DISPLAYSURF)
 			pygame.display.update()
-
