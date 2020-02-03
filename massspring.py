@@ -38,6 +38,7 @@ spring_lis = [] # list of all springs
 gravity_lis = [] # list of all gravity forces
 electricity_lis = [] # list of all electricity forces
 collision_lis = [] # list of all possible collisions made by masses
+same_pos_warn_message = "Objects %s and %s with indexes of %d and %d in the list mass_lis are at the same position"
 
 
 # graphical variables
@@ -119,6 +120,10 @@ def hypot3d(x, y, z):
 def sign(x):
 	return int(copysign(1, x))
 
+def warn_same_pos(m1, m2):
+	warnings.warn(SamePosition(
+	same_pos_warn_message%
+	(m1, m2, m1._index(), m2._index())))
 
 # Exceptions
 class ZeroMass(Exception):
@@ -379,9 +384,7 @@ class spring(force):
 		f = self.force()
 		l = self.length()
 		if l == 0:
-			warnings.warn(SamePosition(
-			"Objects %s and %s with indexes of %d and %d in the list mass_lis are at the same position"%
-			(self.m1, self.m2, self.m1._index(), self.m2._index())))
+			warn_same_pos(self.m1, self.m2)
 			return 0
 		m1 = self.m1
 		m2 = self.m2
@@ -413,9 +416,7 @@ class gravity(force):
 		""" returns the force that two objects enter each other as gravity force according to f = G.m1.m2/r^2 """
 		h = self.h()
 		if h == 0:
-			warnings.warn(SamePosition(
-			"Objects %s and %s with indexes of %d and %d in the list mass_lis are at the same position"%
-			(self.m1, self.m2, self.m1._index(), self.m2._index())))
+			warn_same_pos(self.m1, self.m2)
 			return 0
 		return (G*self.m1.m*self.m2.m)/(h**2)
 
@@ -443,9 +444,7 @@ class electricity(force):
 		""" returns the electricity force that two charged objects enter each other according to f = k.q1.q2/r^2 """
 		h = self.h()
 		if h == 0:
-			warnings.warn(SamePosition(
-			"Objects %s and %s with indexes of %d and %d in the list mass_lis are at the same position"%
-			(self.m1, self.m2, self.m1._index(), self.m2._index())))
+			warn_same_pos(self.m1, self.m2)
 			return 0
 		return k*abs(self.m1.q*self.m2.q)/h**2
 
@@ -493,9 +492,7 @@ class collision(force):
 			d, dx, dy, dz = self.d()
 
 			if d == 0:
-				warnings.warn(SamePosition(
-				"Objects %s and %s with indexes of %d and %d in the list mass_lis are at the same position"%
-				(self.m1, self.m2, self.m1._index(), self.m2._index())))
+				warn_same_pos(self.m1, self.m2)
 				return 0
 
 			# m1.v1 + m2.v2 = m1.u1 + m2.u2
