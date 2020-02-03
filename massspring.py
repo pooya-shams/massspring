@@ -48,6 +48,69 @@ x0 = WINW/2 # the graphical x of the 0 point
 y0 = WINH/2 # the graphical y of the 0 point
 z0 = WIND/2 # the graphical z of the 0 point
 
+# colors
+#				= ( R ,  G ,  B )
+WHITE			= (255, 255, 255)
+SMOKE			= (225, 224, 224)
+DARK_SMOKE		= (192, 192, 192)
+SILVER			= (157, 157, 157)
+GREY			= (128, 128, 128)
+GRAY			= GREY
+BLUE_GREY		= ( 94, 124, 139)
+BLUE_GRAY		= BLUE_GREY
+BLACK			= (  0,   0,   0)
+
+DARK_RED		= (128,   0,   0)
+PURE_RED		= (255,   0,   0)
+RED				= (246,  64,  44)
+
+PINK			= (235,  19,  96)
+PURE_PINK		= (255,   0, 128)
+ROSE			= (246,  39, 157)
+
+MAGENTA			= (255,   0, 255)
+VIOLET			= (238, 130, 239)
+PURPLE			= (156,  26, 177)
+PURE_PURPLE		= (128,   0, 128)
+DARK_PURPLE		= (102,  51, 185)
+
+INDEGO			= ( 61,  76, 183)
+DARK_BLUE		= (  0,   0, 128)
+NAVY			= DARK_BLUE
+BLUE			= ( 15, 147, 245)
+PURE_BLUE		= (  0,   0, 255)
+WATER			= (  0, 166, 246)
+SKY				= (140, 220, 250)
+
+PURE_CYAN		= (  0, 255, 255)
+AQUA			= PURE_CYAN
+CYAN			= (  0, 187, 213)
+TEAL			= (  0, 149, 135)
+DARK_CYAN		= (  0, 128, 128)
+
+DARK_GREEN		= (  0, 128,   0)
+GREEN			= ( 70, 175,  74)
+GRASS			= (136, 196,  64)
+PURE_GREEN		= (  0, 255,   0)
+
+OLIVE			= (128, 128,   0)
+LIME			= (204, 221,  30)
+YELLOW			= (255, 236,  22)
+PURE_YELLOW		= (255, 255,   0)
+
+GOLD			= (252, 214,   3)
+PURE_ORANGE		= (255, 192,   0)
+AMBER			= PURE_ORANGE
+ORANGE			= (255, 151,   0)
+DARK_ORANGE		= (255,  85,   3)
+
+BROWN			= (121,  84,  70)
+LIGHT_CHOCOLATE	= (133,  85,  56)
+PURE_BROWN		= (128,  64,   0)
+CHOCOLATE		= (105,  58,  42)
+DARK_CHOCOLATE	= ( 72,  51,  50)
+WHITE_CHOCOLATE	= (234, 225, 201)
+
 
 # functions
 def hypot3d(x, y, z):
@@ -219,16 +282,13 @@ class mass(object):
 			self.y  += self.vy*dt
 			self.z  += self.vz*dt
 
-	def show_pos(self):
-		""" returns the position of the mass on the screen """
+	def show_pos_xy(self):
+		""" returns the position of the mass on the screen (just x and y) """
 		return int(x0+self.x), int(y0-self.y)
 
-	def show_radius(self):
-		""" returns the radius of the drawn circle on the screen
-		it can be different from the mass radius depending on mass.z """
-		if WIND == 0:
-			return self.r
-		return int( ( 2*self.r ) - ( ( WIND - self.z ) * self.r / WIND ) )
+	def show_pos_zy(self):
+		""" returns the position of the mass on the screen (just z and y) """
+		return int(z0+self.z), int(y0-self.y)
 
 	def show_color(self):
 		""" returns the color of the drawn circle on the screen
@@ -242,10 +302,21 @@ class mass(object):
 		b = int(abs(b * x))
 		return r, g, b
 
-	def show(self, win):
+	def show_xy(self, win):
+		""" draws the mass on the screen (x and y dimensions) """
+		if self.visible:
+			pygame.draw.circle(win, self.show_color(), self.show_pos_xy(), self.r)
+
+	def show_zy(self, win):
+		""" draws the mass on the screen (z and y dimensions) """
+		if self.visible:
+			pygame.draw.circle(win, self.show_color(), self.show_pos_zy(), self.r)
+
+	def show(self, win_xy, win_zy):
 		""" draws the mass on the screen """
 		if self.visible:
-			pygame.draw.circle(win, self.show_color(), self.show_pos(), self.show_radius())
+			self.show_xy(win_xy)
+			self.show_zy(win_zy)
 
 class force(object):
 	def __init__(self, m1 : mass, m2 : mass):
@@ -322,9 +393,16 @@ class spring(force):
 		m2.fy += f*(-dy)/l
 		m2.fz += f*(-dz)/l
 
-	def show(self, win):
+	def show_xy(self, win):
+		pygame.draw.line(win, self.color, self.m1.show_pos_xy(), self.m2.show_pos_xy())
+
+	def show_zy(self, win):
+		pygame.draw.line(win, self.color, self.m1.show_pos_zy(), self.m2.show_pos_zy())
+
+	def show(self, win_xy, win_zy):
 		if self.visible:
-			pygame.draw.line(win, self.color, self.m1.show_pos(), self.m2.show_pos())
+			self.show_xy(win_xy)
+			self.show_zy(win_zy)
 
 class gravity(force):
 	def __init__(self, m1 : mass, m2 : mass):
@@ -516,21 +594,32 @@ def sort_by_z():
 	global mass_lis
 	mass_lis = list( sorted ( mass_lis, key=lambda x: x.z, reverse=True ) )
 
-def show_all_masses(win):
+def show_all_masses(win_xy, win_zy):
 	sort_by_z()
 	for m in mass_lis:
-		m.show(win)
+		m.show(win_xy, win_zy)
 
-def show_all_springs(win):
+def show_all_springs(win_xy, win_zy):
 	for s in spring_lis:
-		s.show(win)
+		s.show(win_xy, win_zy)
 
-def show_all(win):
-	show_all_masses(win)
-	show_all_springs(win)
+def show_all(win_xy, win_zy):
+	show_all_masses(win_xy, win_zy)
+	show_all_springs(win_xy, win_zy)
+
+def display(DISPLAYSURF, win_xy, win_zy):
+	DISPLAYSURF.fill((0, 0, 0))
+	win_xy.fill((0, 0, 0))
+	win_zy.fill((0, 0, 0))
+	show_all(win_xy, win_zy)
+	DISPLAYSURF.blit(win_xy, (0, 0))
+	DISPLAYSURF.blit(win_zy, (WINW+1, 0))
+	pygame.draw.line(DISPLAYSURF, (255, 0, 0), (WINW, 0), (WINW, WINH))
 
 def mainloop(speed=2, FPS=0, frame=None, *args):
-	DISPLAYSURF = pygame.display.set_mode((WINW, WINH))
+	DISPLAYSURF = pygame.display.set_mode((WINW*2+1, WINH))
+	win_xy = pygame.surface.Surface((WINW, WINH))
+	win_zy = pygame.surface.Surface((WINW, WINH))
 	c = 0
 	spa = 1
 	updating = True
@@ -552,6 +641,6 @@ def mainloop(speed=2, FPS=0, frame=None, *args):
 		if FPS!=0:pygame.time.Clock().tick(FPS)
 		if updating : update() ; frame(*args) if callable(frame) else None
 		if c%speed == 0:
-			DISPLAYSURF.fill((0, 0, 0))
-			show_all(DISPLAYSURF)
+			display(DISPLAYSURF, win_xy, win_zy)
 			pygame.display.update()
+
