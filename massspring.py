@@ -635,9 +635,12 @@ def mainloop(speed=2, FPS=0, frame=None, *args):
 					return 0
 			elif e.type == pygame.MOUSEBUTTONDOWN:
 				updating = not updating
-		if FPS!=0:pygame.time.Clock().tick(FPS)
-		if updating : update() ; frame(*args) if callable(frame) else None
+		if FPS!=0:
+			pygame.time.Clock().tick(FPS)
+		if updating: 
+			update()
+			if frame is not None:
+				frame(*args)
 		if c%speed == 0:
 			display(DISPLAYSURF, win_xy, win_zy)
 			pygame.display.update()
-
