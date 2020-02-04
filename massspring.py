@@ -39,6 +39,10 @@ gravity_lis = [] # list of all gravity forces
 electricity_lis = [] # list of all electricity forces
 collision_lis = [] # list of all possible collisions made by masses
 same_pos_warn_message = "Objects %s and %s with indexes of %d and %d in the list mass_lis are at the same position"
+sp = "spring"
+el = "electricity"
+gv = "gravity"
+cl = "collision"
 
 
 # graphical variables
@@ -324,10 +328,26 @@ class mass(object):
 			self.show_zy(win_zy)
 
 class force(object):
-	def __init__(self, m1 : mass, m2 : mass):
-		assert type(m2) == type(m1) == mass, TypeError("can't set gravity to objects of type '%s' and '%s'\nthey must be from type 'mass'" % ( type(m1), type(m2) ) )
+	def __init__(self, m1 : mass, m2 : mass, name : str, object_list : list):
+		assert type(m2) == type(m1) == mass, TypeError(f"can't set {name} force to objects of type {type(m1)} and {type(m2)}\nthey must be from type 'mass'")
+		assert type(object_list) == list, TypeError("object list must be from type 'list'")
 		self.m1 = m1
 		self.m2 = m2
+		self.name = name
+		self.object_list = object_list
+		self.object_list.append(self)
+
+	def _index(self):
+		for i, f in enumerate(self.object_list):
+			if f == self:
+				return i
+		return -1
+
+	def __del__(self):
+		try:
+			self.object_list.pop(self._index())
+		except Exception as e:
+			print("[!] Error when deleting : "+str(e))
 
 	def dx(self):
 		""" returns the delta x of first object and second object """
@@ -354,25 +374,13 @@ class force(object):
 
 class spring(force):
 	def __init__(self, m1 : mass, m2 : mass, k=1, l=0, color=(255, 255, 255), visible=True):
-		force.__init__(self, m1, m2)
+		force.__init__(self, m1, m2, sp, spring_lis)
 		self.k = k
 		self.l = l
 		if l == 0:
 			self.l = self.length()
 		self.color = color
 		self.visible = visible
-		spring_lis.append(self)
-
-	def _index(self):
-		for i, spring in enumerate(spring_lis):
-			if spring == self:
-				return i
-
-	def __del__(self):
-		try:
-			spring_lis.pop(self._index())
-		except Exception as e:
-			print("[!] Error when deleting : "+str(e))
 
 	def length(self):
 		return self.h()
@@ -409,8 +417,7 @@ class spring(force):
 
 class gravity(force):
 	def __init__(self, m1 : mass, m2 : mass):
-		force.__init__(self, m1, m2)
-		gravity_lis.append(self)
+		force.__init__(self, m1, m2, gv, gravity_lis)
 
 	def get_force(self):
 		""" returns the force that two objects enter each other as gravity force according to f = G.m1.m2/r^2 """
@@ -437,8 +444,7 @@ class gravity(force):
 
 class electricity(force):
 	def __init__(self, m1 : mass, m2 : mass):
-		force.__init__(self, m1, m2)
-		electricity_lis.append(self)
+		force.__init__(self, m1, m2, el, electricity_lis)
 
 	def get_force(self):
 		""" returns the electricity force that two charged objects enter each other according to f = k.q1.q2/r^2 """
@@ -476,8 +482,7 @@ class electricity(force):
 
 class collision(force):
 	def __init__(self, m1 : mass, m2 : mass):
-		force.__init__(self, m1, m2)
-		collision_lis.append(self)
+		force.__init__(self, m1, m2, cl, collision_lis)
 
 	def check_collision(self):
 		""" checks if two objects are collided or not """
