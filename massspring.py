@@ -551,14 +551,79 @@ class collision(force):
         return False
 
     def collide(self):
-        """ collides two objects """
-        if self.check_collision():
-            d, dx, dy, dz = self.d()
-
-            if d == 0:
-                return 0
-
-            electricity.equalise_charge(self)
+        """ collides two objects (beta version) """
+        # checking if the objects has collided
+        if not self.check_collision():
+            return
+        # saving variables
+        d, dx, dy, dz = self.d()
+        if d == 0:
+            return 0
+        m1 = self.m1
+        m2 = self.m2
+        u1x = m1.vx
+        u1y = m1.vy
+        u1z = m1.vz
+        u2x = m2.vx
+        u2y = m2.vy
+        u2z = m2.vz
+        # calculating velocities of the first object in 3 directions
+        v1x = (((m1.m - m2.m) * u1x) + (2 * m2.m * u2x)) / (m1.m + m2.m)
+        v1y = (((m1.m - m2.m) * u1y) + (2 * m2.m * u2y)) / (m1.m + m2.m)
+        v1z = (((m1.m - m2.m) * u1z) + (2 * m2.m * u2z)) / (m1.m + m2.m)
+        # calculating velocities of the second object in 3 directions
+        v2x = (((m2.m - m1.m) * u2x) + (2 * m1.m * u1x)) / (m1.m + m2.m)
+        v2y = (((m2.m - m1.m) * u2y) + (2 * m1.m * u1y)) / (m1.m + m2.m)
+        v2z = (((m2.m - m1.m) * u2z) + (2 * m1.m * u1z)) / (m1.m + m2.m)
+        # calculating delta x, y and z for the first object
+        dv1x = v1x - u1x
+        dv1y = v1y - u1y
+        dv1z = v1z - u1z
+        # calculating delta x, y and z for the second object
+        dv2x = v2x - u2x
+        dv2y = v2y - u2y
+        dv2z = v2z - u2z
+        # calculating acceleration in 3 directions for the first object
+        a1x = dv1x / dt
+        a1y = dv1y / dt
+        a1z = dv1z / dt
+        # calculating acceleration in 3 directions for the second object
+        a2x = dv2x / dt
+        a2y = dv2y / dt
+        a2z = dv2z / dt
+        # calculating force in 3 directions for the first object
+        f1x = a1x * m1.m
+        f1y = a1y * m1.m
+        f1z = a1z * m1.m
+        # calculating force in 3 directions for the second object
+        f2x = a2x * m2.m
+        f2y = a2y * m2.m
+        f2z = a2z * m2.m
+        # using 3d pythagorean equation to
+        # calculate the absolute value of the forces
+        f1 = hypot3d(f1x, f1y, f1z)
+        f2 = hypot3d(f2x, f2y, f2z)
+        # now using the similarity of the pyramid of forces and
+        # the pyramid of distances between the centers of spheres
+        f1nx = f1 * dx / d
+        f1ny = f1 * dy / d
+        f1nz = f1 * dz / d
+        # doing the same for the second object
+        f2nx = f2 * dx / d
+        f2ny = f2 * dy / d
+        f2nz = f2 * dz / d
+        # adding new forces to the old ones for the first object
+        m1.fx += f1nx
+        m1.fy += f1ny
+        m1.fz += f1nz
+        # adding new forces to the old ones for the second object
+        m2.fx -= f2nx
+        m2.fy -= f2ny
+        m2.fz -= f2nz
+        # the collision is done!
+        # equalising the electrical charges of two objects
+        # (if they are conductive)
+        electricity.equalise_charge(self)
 
 
 def create_all_collisions():
@@ -638,8 +703,8 @@ def initialize():
 def update():
     empty_all_forces()
     reflect_all()
-    collide_all()
     set_all_forces()
+    collide_all()
     move_all()
 
 
