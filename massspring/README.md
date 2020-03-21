@@ -42,7 +42,7 @@ there are four types of forces (technically force subclass) you can create:
 #### gravity
 
 the gravity class provides a gravity force between two masses according to the **"Newoton's law of universal gravitation"** which you can see bellow:  
-![gravity formula](https://wikimedia.org/api/rest_v1/media/math/render/svg/8c6ee5510ba3c7d6664775c0e76b53e72468303a)  
+![gravity formula](./images/gravity.svg)  
 more information is available at [Newton's law of universal gravitation](https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation) wikipedia page.  
 you can create a gravity force between two masses using the code bellow:
 
@@ -55,7 +55,7 @@ g1 = m.gravity(m1=m1, m2=m2)
 #### electricity
 
 the electricity class provides an electricity force between two masses according to the **"Coulomb's law"** (the vector version) which you can see bellow:  
-![Coulomb's law](https://wikimedia.org/api/rest_v1/media/math/render/svg/6a815b94d95194b85a8fe53c0b1b5935764ea458)  
+![Coulomb's law](./images/Coulomb.svg)  
 more information is available at [Coulomb's law](https://en.wikipedia.org/wiki/Coulomb%27s_law) wikipedia page.
 you can create an electricity force between two masses using the code bellow:
 
@@ -68,7 +68,7 @@ e1 = m.electricity(m1=m1, m2=m2)
 #### spring
 
 spring can also be known as an object. However, spring class is a subclass of force class. So technically spring is a force. the force will be calculated using the **"Hooke's law"**:  
-![Hooke's law: F=-kx](https://wikimedia.org/api/rest_v1/media/math/render/svg/66774554c5cee5c22c57b0950c06ded0d36da720)  
+![Hooke's law: F=-kx](./images/Hooke.svg)  
 more information is available on [Hooke's law](https://en.wikipedia.org/wiki/Hooke%27s_law) wikipedia page.  
 you can create a spring object by using the spring class. you can learn more about the arguments and their usage in the [spring class documention](./massspring.py#spring).
 
@@ -101,14 +101,14 @@ m.mainloop(speed=2, FPS=0, frame=None, *args)
 
 You can see a simple example of using massspring library to create a pendulum.
 It has an acceleration of -g in the Y ordinate.
-!["pendulum"](https://github.com/pooya-shams/massspring/tree/master/images/massspring%20(pendulum).gif)
+!["pendulum"](./images/massspring%20(pendulum).gif)
 
 available at [example 1](./example%201%20(pendulum).py)
 
 Here is anothere example of using this library.</br>
 As you can see there is a double pendulum shown in the image. However, it is show in both x-y and z-y coordinates (x-y at left and z-y at right). you might feel they are completely different objects but they are just showing one object from two different points of veiw.
 
-![double pendulum](https://github.com/pooya-shams/massspring/tree/master/images/massspring%20(double%20pendulum).gif)
+![double pendulum](./images/massspring%20(double%20pendulum).gif)
 
 available at [example 2](./example%202%20(double%20pendulum%203d).py).
 
