@@ -1,94 +1,133 @@
 # massspring
 
-## Author : Pooya.Sh.K 
+## Author : Pooya.Sh.K
+
 Inspired by Saeed Sarkarati
 
 ## Brief
-<p>
+
 using this library you can create great simulations of most of physical environments which can be calculated presizely. you can create many types of objects from which "mass" and "spring" are main ones.
-</p>
 
 ## license
-licensed under GNU General Public License version 3
+
+licensed under GNU General Public License version 3.
+you can freely use and modify this package, but please let me know if you are doing something interesting.
 
 ## usage
-<div>
-<ul>
-<li>
-<p>
+
 you can import the library by using the following code (it is recommended to import as m or ms)
 
 ```python
 import massspring as m
 ```
-</p>
-</li>
-<li>
-<p>
-you can create a mass object by using the mass class. you can learn more about the arguments and their usage in the <a href="./massspring.py#mass">mass class documention</a>
+
+### mass
+
+mass is the only type of **object** you can create right now.  
+you can create a mass object by using the mass class. you can learn more about the arguments and their usage in the [mass class documention](./massspring.py#mass)
 
 ```python
 m1 = m.mass(x=0, y=0, z=0, vx=0, vy=0, vz=0, m=10, r=10, q=0, moveable=False, solid=True, bound=True, gravitateable=False, resistable=False, electrical=False, conductive=False, color=(0, 255, 0), visible=True)
 ```
-</p>
-</li>
-<li>
-<p>
-you can create a spring object by using the spring class. you can learn more about the arguments and their usage in the <a href="./massspring.py#spring">spring class documention</a>
+
+### force
+
+there are four types of forces (technically force subclass) you can create:  
+1.gravity  
+2.electricity  
+3.spring  
+4.collision  
+
+#### gravity
+
+the gravity class provides a gravity force between two masses according to the **"Newoton's law of universal gravitation"** which you can see bellow:  
+![gravity formula](./images/gravity.svg)  
+more information is available at [Newton's law of universal gravitation](https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation) wikipedia page.  
+you can create a gravity force between two masses using the code bellow:
+
+```python
+g1 = m.gravity(m1=m1, m2=m2)
+```
+
+(m1 and m2 are the two mass objects between which you want to set gravity force.)
+
+#### electricity
+
+the electricity class provides an electricity force between two masses according to the **"Coulomb's law"** (the vector version) which you can see bellow:  
+![Coulomb's law](./images/Coulomb.svg)  
+more information is available at [Coulomb's law](https://en.wikipedia.org/wiki/Coulomb%27s_law) wikipedia page.
+you can create an electricity force between two masses using the code bellow:
+
+```python
+e1 = m.electricity(m1=m1, m2=m2)
+```
+
+(m1 and m2 are the two mass objects between which you want to set electricity force.)
+
+#### spring
+
+spring can also be known as an object. However, spring class is a subclass of force class. So technically spring is a force. the force will be calculated using the **"Hooke's law"**:  
+![Hooke's law: F=-kx](./images/Hooke.svg)  
+more information is available on [Hooke's law](https://en.wikipedia.org/wiki/Hooke%27s_law) wikipedia page.  
+you can create a spring object by using the spring class. you can learn more about the arguments and their usage in the [spring class documention](./massspring.py#spring).
 
 ```python
 s1 = m.spring(k=1500000, l=0, m1=m1, m2=m2, color=(255, 0, 0), visible=True)
 ```
-</p>
-</li>
-<li>
-<p>
-similarly you can create other objects which play the roll of forces between masses.
-you can see them here:
-	<ol type="1">
-		<li><a href="./massspring.py#force">the base force class</a></li>
-		<li><a href="./massspring.py#gravity">the gravity class</a></li>
-		<li><a href="./massspring.py#electricity">the electricity class</a></li>
-	</ol>
-</p>
-</li>
-</ul>
-</div>
+
+#### collision
+
+uses the conservation of momentum and kinetic energy and the equations presented at the [Elastic Collision](https://en.wikipedia.org/wiki/Elastic_collision) wikipedia page.
+
+```python
+c1 = m.collision(m1=m1, m2=m2)
+```
+
+### mainloop
+
+after creating all of the objects and forces you want, you should call the mainloop function which is an infinite while loop and ends when the user closes the window or presses the ESCape button.  
+arguments are:  
+1.speed: the more this number is the faster your program runs. it will decrease the number of frames in which the screen will be updated(increases the space between them).  
+2.FPS: sets the fps parameter for the pygame.time.Clock().tick(FPS) function. the less this number is the less your cpu will be under pressure.  
+3.frame: it's a function which will be called every frame of the program.  
+4.\*args: the arguments you want to give to the frame function.
+
+```python
+m.mainloop(speed=2, FPS=0, frame=None, *args)
+```
 
 ## examples
-<div>
-<ol type="1">
-<li>
-	<p>
-	You can see a simple example of using massspring library to create a pendulum.</br>
-	It has an acceleration of -g in the Y ordinate.
-	</br>
-	<img src="./examples/massspring (pendulum).gif" alt="pendulum" style="border-radius:20px;width:500px;"></img>
-	</br>
-	available at <a href="./example 1 (pendulum).py">example 1</a>
-	</p>
-</li>
-<li>
-	<p>
-	Here is anothere example of using this library.</br>
-	As you can see there is a double pendulum shown in the image. However, it is show in both x-y and z-y coordinates (x-y at left and z-y at right). you might feel they are completely different objects but they are just showing one object from two different points of veiw.
-	</br>
-	<img src="./examples/massspring (double pendulum).gif" alt="double pendulum" style="border-radius:20px;width:500px;"></img>
-	</br>
-	available at <a href="./example 2 (double pendulum 3d).py">example 2</a>
-	</p>
-</li>
-</ol>
-<ul>
-<li>
-	<p>
-	Other examples are available here (more to be added in future):
-	<ol start="3" type="1">
-		<li><a href="./example 3 (3d pyramid).py">example 3</a></li>
-		<li><a href="./example 4 (rope).py">example 3</a></li>
-		<li><a href="./example 5 (collision).py">example 3</a></li>
-	</ol>
-	</p>
-</li>
-</ul>
-</div>
+
+You can see a simple example of using massspring library to create a pendulum.
+It has an acceleration of -g in the Y ordinate.
+!["pendulum"](./images/massspring%20(pendulum).gif)
+
+available at [example 1](./example%201%20(pendulum).py)
+
+Here is anothere example of using this library.</br>
+As you can see there is a double pendulum shown in the image. However, it is show in both x-y and z-y coordinates (x-y at left and z-y at right). you might feel they are completely different objects but they are just showing one object from two different points of veiw.
+
+![double pendulum](./images/massspring%20(double%20pendulum).gif)
+
+available at [example 2](./example%202%20(double%20pendulum%203d).py).
+
+3.[example 3]("./example%203%20(3d%20pyramid).py")  
+4.[example 4](./example%204%20(rope).py)  
+5.[example 5](./example%205%20(collision).py)  
+
+## Requirements
+
+python >= 3.6  
+pygame >= 1.9.2
+
+## TODO
+
+(feel free to complete these tasks)
+
+- [ ] Update the Elastic collision.
+- [ ] Divide the collision to Elastic collision and Inelastic collision.
+- [ ] Create non-sphere/non-mass objects.
+- [ ] Collision between mass and spring (mass: sphere with mass, spring: line without mass).
+- [ ] Collision between non-sphere objects, sphere objects and line objects(spring).
+- [ ] Add statistic screen.
+- [ ] Create the c/c++ project.

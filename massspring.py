@@ -40,7 +40,7 @@ ge is earth's gravity acceleration; measured in m*s^-2.
 dt = .001
 G = 6.67384e-11
 e0 = 8.854187817e-12
-k = 1/(4*pi*e0)
+k = 1 / (4 * pi * e0)
 Cd = .47
 da = 1.2
 ax0 = 0
@@ -66,9 +66,9 @@ cl = "collision"
 WINW = 600  # window width  (_)
 WINH = 600  # window height (|)
 WIND = 600  # window depth  (.)
-x0 = WINW/2  # the graphical x of the 0 point
-y0 = WINH/2  # the graphical y of the 0 point
-z0 = WIND/2  # the graphical z of the 0 point
+x0 = WINW / 2  # the graphical x of the 0 point
+y0 = WINH / 2  # the graphical y of the 0 point
+z0 = WIND / 2  # the graphical z of the 0 point
 
 # colors [= ( R ,  G ,  B )]
 WHITE = (255, 255, 255)
@@ -126,7 +126,7 @@ WHITE_CHOCOLATE = (234, 225, 201)
 
 # functions
 def hypot3d(x, y, z):
-    return sqrt(x**2 + y**2 + z**2)
+    return sqrt(x ** 2 + y ** 2 + z ** 2)
 
 
 def sign(x):
@@ -173,11 +173,19 @@ class NonElectricalConductive(Exception):
 class SamePosition(Warning):
     pass
 
-# objects
+# objects(physical meaning) classes
 # mass
 
 
 class mass(object):
+    """
+    the main mass object class.
+    ALL attributes are available in the __init__ method.
+    ALL methods are availeble in the class.
+    no attribute or method will be added
+    to objects unless the user adds it to objects.
+    """
+
     def __init__(self,
                  x=0, y=0, z=0, vx=0, vy=0, vz=0,
                  m=1, r=1, q=0,
@@ -185,11 +193,15 @@ class mass(object):
                  resistable=False, electrical=False, conductive=False,
                  color=(255, 255, 255), visible=True):
         """
+        parameters:
         x, y, z are the object's position.
         vx, vy, vz are the object's velocity.
-        m is mass.
-        r is radius.
-        q is electrical charge.
+        fx, fy, fz are the sum of forces entered to the object.
+            they will be added by calling the set_force method
+            in each force's object to the force's masses (m1, m2).
+        m is mass of object.
+        r is radius of object (each mass is consumed as a sphere).
+        q is electrical charge of the object.
         moveable means if the object can move or not.
         solid means if the object can hit other objects or not.
         bound means if the object stays in the screen or not.
@@ -272,23 +284,29 @@ class mass(object):
         return hypot3d(ax, ay, az), ax, ay, az
 
     def A(self):
-        """ returns the cross sectional area of the object assumed as sphere
-        -> cross sectional area is a circle, the circle's area is pi*r^2 """
-        return pi*self.r**2
+        """
+        returns the cross sectional area of the object assumed as sphere
+        -> cross sectional area is a circle, the circle's area is pi*r^2
+        """
+        return pi * self.r ** 2
 
     def f(self):
         """ returns the force of the object from all directions """
         return hypot3d(self.fx, self.fy, self.fz)
 
     def force(self):
-        """ returns the force of the object
-        according to newtons second law f=ma """
+        """
+        returns the force of the object
+        according to newtons second law f=ma
+        """
         return self.m * self.a()[0]
 
     def air_resistance_force(self):
-        """ returns the force that is entered to the object because of
-        air resistance according to f = p*v^2*C*A/2 """
-        return da*self.v()**2*Cd*self.A()/2
+        """
+        returns the force that is entered to the object because of
+        air resistance according to f = p*v^2*C*A/2
+        """
+        return da * self.v() ** 2 * Cd * self.A() / 2
 
     def empty_forces(self):
         """ sets the objects forces to 0 """
@@ -311,45 +329,49 @@ class mass(object):
     def reflect(self):
         """ reflects the object if it hits the walls """
         if self.bound:
-            if not (-WINW//2+self.r < self.x < WINW//2-self.r):
+            if not (-WINW // 2 + self.r < self.x < WINW // 2 - self.r):
                 self.vx *= -1
-            if not (-WINH//2+self.r < self.y < WINH//2-self.r):
+            if not (-WINH // 2 + self.r < self.y < WINH // 2 - self.r):
                 self.vy *= -1
-            if not (-WIND//2+self.r < self.z < WIND//2-self.r):
+            if not (-WIND // 2 + self.r < self.z < WIND // 2 - self.r):
                 self.vz *= -1
 
     def move(self):
-        """ moves the object according to
-        newtons second law -> f = ma => a = f/m """
+        """
+        moves the object according to
+        newtons second law -> f = ma => a = f/m
+        """
         if self.moveable:
             # attention! self.ax(), self.ay() and self.az() are
             # calculated by vx/dt, vy/dt and vz/dt
-            ax, ay, az = self.fx/self.m, self.fy/self.m, self.fz/self.m
+            ax, ay, az = self.fx / self.m, self.fy / self.m, self.fz / self.m
             ax += ax0
             ay += ay0
             az += az0
-            self.vx += ax*dt
-            self.vy += ay*dt
-            self.vz += az*dt
-            self.x += self.vx*dt
-            self.y += self.vy*dt
-            self.z += self.vz*dt
+            self.vx += ax * dt
+            self.vy += ay * dt
+            self.vz += az * dt
+            self.x += self.vx * dt
+            self.y += self.vy * dt
+            self.z += self.vz * dt
 
     def show_pos_xy(self):
         """ returns the position of the mass on the screen (just x and y) """
-        return int(x0+self.x), int(y0-self.y)
+        return int(x0 + self.x), int(y0 - self.y)
 
     def show_pos_zy(self):
         """ returns the position of the mass on the screen (just z and y) """
-        return int(z0+self.z), int(y0-self.y)
+        return int(z0 + self.z), int(y0 - self.y)
 
     def show_color(self):
-        """ returns the color of the drawn circle on the screen
-        it can be different from the mass radius depending on mass.z """
+        """
+        returns the color of the drawn circle on the screen
+        it can be different from the mass radius depending on mass.z
+        """
         if not self.bound:
             return self.color
         r, g, b = self.color
-        x = (WIND+self.z) / (2 * WIND)
+        x = (WIND + self.z) / (2 * WIND)
         r = int(abs(r * x))
         g = int(abs(g * x))
         b = int(abs(b * x))
@@ -373,9 +395,34 @@ class mass(object):
             self.show_xy(win_xy)
             self.show_zy(win_zy)
 
+# Force's classes
+# main force
+
 
 class force(object):
+    """
+    the main force class.
+    this class is a raw class used to create other classes of forces.
+    the subclasses are 'spring', 'gravity', 'electricity', 'collision'
+    since all forces in OUR universe are between two objects, the force
+    class has two 'm1' and 'm2' that the force occures between them.
+    there are two other attributes too:
+    1. name: is just a string of the force name which will be used when
+    raising exceptions
+    2. object_list: is the list containing all of the forces of the same type.
+    """
+
     def __init__(self, m1: mass, m2: mass, name: str, object_list: list):
+        """
+        takes four parameters:
+        1. m1: first mass the force will be assigned to.
+        2. m2: second mass.
+        3. name: is just a string of the force name which will be used when
+        raising exceptions
+        4. object_list: is the list containing
+        all of the forces of the same type.
+        the object will be appended to the list after being created.
+        """
         assert_type_error_mass(m1, m2, name)
         assert_type_error_list(object_list)
         self.m1 = m1
@@ -385,12 +432,18 @@ class force(object):
         self.object_list.append(self)
 
     def _index(self):
+        """
+        returns the index of the object in the object_list.
+        used when delleting the object so it will be
+        removed from the object_list
+        """
         for i, f in enumerate(self.object_list):
             if f == self:
                 return i
         return -1
 
     def __del__(self):
+        """ tries to remove the object from it's object_list """
         try:
             self.object_list.pop(self._index())
         except Exception as e:
@@ -409,8 +462,10 @@ class force(object):
         return self.m1.z - self.m2.z
 
     def d(self):
-        """ returns the distance between first object
-        and second object and delta x, y, z """
+        """
+        returns the distance between first object
+        and second object and delta x, y, z
+        """
         dx = self.dx()
         dy = self.dy()
         dz = self.dz()
@@ -420,15 +475,40 @@ class force(object):
         return d, dx, dy, dz
 
     def h(self):
-        """ just returns the distance between
-        first object and second object """
+        """
+        just returns the distance between
+        first object and second object
+        """
         return self.d()[0]
+
+# spring
 
 
 class spring(force):
+    """
+    the main spring class derived from force class.
+    this force is calculated according to the Hooke's law.
+    attributes are:
+    m1, m2: the objects between which the force will happen.
+    k: is the constant of the spring in the formula of Hookes's law.
+    nl: is the natural length of the spring used to
+    calculate the delta x in the formula.
+    color: the color shown on the screen.
+    visible (boolean): indicates if the object
+    will be shown on the screen or not.
+    """
+
     def __init__(self, m1: mass, m2: mass, k=1,
                  nl=0, color=(255, 255, 255), visible=True):
         force.__init__(self, m1, m2, sp, spring_lis)
+        """
+        parameter:
+        m1 and m2 are masses.
+        k is the constant of the spring in the Hooke's law.
+        nl is the natural length of the spring
+        used to calulate delta x in the Hooke's law.
+        color and visible: guess!
+        """
         self.k = k
         self.nl = nl
         if nl == 0:
@@ -437,50 +517,76 @@ class spring(force):
         self.visible = visible
 
     def length(self):
+        """
+        returns the length of object using length
+        of the line between two masses (m1 and m2).
+        """
         return self.h()
 
     def force(self):
-        return -self.k*(self.length()-self.nl)
+        """ calculates the force which should be entered to the masses. """
+        return - self.k * (self.length() - self.nl)
 
     def set_forces(self):
+        """ enters the force to the masses. """
         f = self.force()
         r, dx, dy, dz = self.d()
         if r == 0:
             return 0
         m1 = self.m1
         m2 = self.m2
-        m1.fx += f*(dx)/r
-        m1.fy += f*(dy)/r
-        m1.fz += f*(dz)/r
-        m2.fx += f*(-dx)/r
-        m2.fy += f*(-dy)/r
-        m2.fz += f*(-dz)/r
+        m1.fx += f * (dx) / r
+        m1.fy += f * (dy) / r
+        m1.fz += f * (dz) / r
+        m2.fx += f * (-dx) / r
+        m2.fy += f * (-dy) / r
+        m2.fz += f * (-dz) / r
 
     def show_xy(self, win):
+        """ method for showing the spring on the screen of x-y coordinates. """
         pygame.draw.line(win, self.color, self.m1.show_pos_xy(),
                          self.m2.show_pos_xy())
 
     def show_zy(self, win):
+        """ method for showing the spring on the screen of z-y coordinates. """
         pygame.draw.line(win, self.color, self.m1.show_pos_zy(),
                          self.m2.show_pos_zy())
 
     def show(self, win_xy, win_zy):
+        """
+        gets the win_xy and win_zy, the screens which will be
+        shown on the main screen.
+        and then calls the show_xy and show_zy methods using them.
+        """
         if self.visible:
             self.show_xy(win_xy)
             self.show_zy(win_zy)
 
+# gravity
+
 
 class gravity(force):
+    """
+    the main gravity force class.
+    uses the newton's law of gravity.
+    """
+
     def __init__(self, m1: mass, m2: mass):
+        """
+        parameters:
+        m1 and m2: masses.
+        """
         force.__init__(self, m1, m2, gv, gravity_lis)
 
     def get_force(self):
-        """ returns the force that two objects enter each other
-        as gravity force according to f = G.m1.m2/r^2 """
+        """
+        returns the force that two objects enter each other
+        as gravity force according to f = G.m1.m2/r^2
+        """
         h = self.h()
         if h == 0:
             return 0
-        return (G*self.m1.m*self.m2.m)/(h**2)
+        return (G * self.m1.m * self.m2.m) / (h ** 2)
 
     def set_force(self):
         """ sets the gravity force to the object and its gravital pair """
@@ -498,18 +604,32 @@ class gravity(force):
         self.m2.fy += fy
         self.m2.fz += fz
 
+# electricity
+
 
 class electricity(force):
+    """
+    the main force class.
+    uses the Coulomb law for calculating
+    the electricity force between two particles.
+    """
+
     def __init__(self, m1: mass, m2: mass):
+        """
+        parameters:
+        m1 and m2: masses.
+        """
         force.__init__(self, m1, m2, el, electricity_lis)
 
     def get_force(self):
-        """ returns the electricity force that two charged objects enter
-        each other according to f = k.q1.q2/r^2 """
+        """
+        returns the electricity force that two charged objects enter
+        each other according to f = k.q1.q2/r^2
+        """
         h = self.h()
         if h == 0:
             return 0
-        return k*abs(self.m1.q*self.m2.q)/h**2
+        return k * abs(self.m1.q * self.m2.q) / h ** 2
 
     def re(self):
         """ returns the side of the electrical force """
@@ -533,13 +653,26 @@ class electricity(force):
         self.m2.fz -= fz
 
     def equalise_charge(self):
+        """
+        checks if two objects are conduntive and then
+        equalises the electrical charge between them.
+        """
         if self.m1.conductive and self.m2.conductive:
             q = (self.m1.q + self.m2.q) / 2
             self.q = q
             self.m2.q = q
 
+# collision
+
 
 class collision(force):
+    """
+    the main collision class (beta version).
+    uses the momentum and kinetic conservation and
+    I don't know why it works but according to wikipedia
+    the formula and equation are driven from these two equations.
+    """
+
     def __init__(self, m1: mass, m2: mass):
         force.__init__(self, m1, m2, cl, collision_lis)
 
@@ -624,6 +757,8 @@ class collision(force):
         # equalising the electrical charges of two objects
         # (if they are conductive)
         electricity.equalise_charge(self)
+
+# other functions
 
 
 def create_all_collisions():
@@ -738,9 +873,15 @@ def display(DISPLAYSURF, win_xy, win_zy):
     DISPLAYSURF.blit(win_zy, (WINW+1, 0))
     pygame.draw.line(DISPLAYSURF, (255, 0, 0), (WINW, 0), (WINW, WINH))
 
+# main loop
+
 
 def mainloop(speed=2, FPS=0, frame=None, *args):
-    DISPLAYSURF = pygame.display.set_mode((WINW*2+1, WINH))
+    assert type(speed) == int, TypeError("speed should be of type 'int'.")
+    assert type(FPS) == int, TypeError("FPS should be of type 'int'.")
+    assert callable(frame) or frame is None, TypeError(
+        "frame should be callable.")
+    DISPLAYSURF = pygame.display.set_mode((WINW * 2 + 1, WINH))
     win_xy = pygame.surface.Surface((WINW, WINH))
     win_zy = pygame.surface.Surface((WINW, WINH))
     c = 0
