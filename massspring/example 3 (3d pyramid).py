@@ -1,8 +1,8 @@
 import massspring as m
 
-m.ax0 = -m.ge
-m.ay0 = -m.ge
-m.az0 = -m.ge
+m.acceleration.x = -m.ge
+m.acceleration.y = -m.ge
+m.acceleration.z = -m.ge
 
 n = 5
 

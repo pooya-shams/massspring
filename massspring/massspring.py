@@ -33,8 +33,6 @@ k is coulomb constant(electrostatic constant); measured in m^2*N*C^-2
 Cd is drag coefficient -> 0.47 for sphere; non-united
 da is ro -> density of air; measured in kg*m^-3
     where kg is kilograms, m is meters.
-ax0, ay0 and az0 are acceleration in 3 directions; measured in m*s^-2
-    where m is meters, s is seconds.
 ge is earth's gravity acceleration; measured in m*s^-2.
 """
 dt = .001
@@ -43,9 +41,6 @@ e0 = 8.854187817e-12
 k = 1 / (4 * pi * e0)
 Cd = .47
 da = 1.2
-ax0 = 0
-ay0 = 0
-az0 = 0
 ge = 9.8
 
 # programming variables
@@ -66,9 +61,6 @@ cl = "collision"
 WINW = 600  # window width  (_)
 WINH = 600  # window height (|)
 WIND = 600  # window depth  (.)
-x0 = WINW / 2  # the graphical x of the 0 point
-y0 = WINH / 2  # the graphical y of the 0 point
-z0 = WIND / 2  # the graphical z of the 0 point
 
 # colors [= ( R ,  G ,  B )]
 WHITE = (255, 255, 255)
@@ -130,7 +122,11 @@ def hypot3d(x, y, z):
 
 
 def sign(x):
-    return int(copysign(1, x))
+    if x < 0:
+        return -1
+    elif x > 0:
+        return 1
+    return 0
 
 
 def warn_same_pos(m1, m2):
@@ -172,6 +168,26 @@ class NonElectricalConductive(Exception):
 
 class SamePosition(Warning):
     pass
+
+# variable holders (namespaces)
+
+
+class acceleration:
+    """
+    x, y, z are default acceleration in 3 directions; measured in m*s^-2
+    where m is meters, s is seconds.
+    """
+    x = 0
+    y = 0
+    z = 0
+
+
+class position:
+    """ x, y, z are default 0 point position in pygame surface """
+    x = WINW // 2
+    y = WINH // 2
+    z = WIND // 2
+
 
 # objects(physical meaning) classes
 # mass
@@ -345,9 +361,9 @@ class mass(object):
             # attention! self.ax(), self.ay() and self.az() are
             # calculated by vx/dt, vy/dt and vz/dt
             ax, ay, az = self.fx / self.m, self.fy / self.m, self.fz / self.m
-            ax += ax0
-            ay += ay0
-            az += az0
+            ax += acceleration.x
+            ay += acceleration.y
+            az += acceleration.z
             self.vx += ax * dt
             self.vy += ay * dt
             self.vz += az * dt
@@ -357,11 +373,11 @@ class mass(object):
 
     def show_pos_xy(self):
         """ returns the position of the mass on the screen (just x and y) """
-        return int(x0 + self.x), int(y0 - self.y)
+        return int(position.x + self.x), int(position.y - self.y)
 
     def show_pos_zy(self):
         """ returns the position of the mass on the screen (just z and y) """
-        return int(z0 + self.z), int(y0 - self.y)
+        return int(position.z + self.z), int(position.y - self.y)
 
     def show_color(self):
         """

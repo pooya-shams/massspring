@@ -1,8 +1,8 @@
 import massspring as m
 
-m.ax0 = 0
-m.ay0 = -m.ge
-m.az0 = -m.ge
+m.acceleration.x = 0
+m.acceleration.y = -m.ge
+m.acceleration.z = -m.ge
 
 m1 = m.mass(x=0, y=0, z=0, vx=0, vy=0, vz=0, m=20, r=10, q=0, moveable=False,
             solid=True, bound=True, gravitateable=False, resistable=False,

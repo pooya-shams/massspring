@@ -105,7 +105,7 @@ It has an acceleration of -g in the Y ordinate.
 
 available at [example 1](./example%201%20(pendulum).py)
 
-Here is anothere example of using this library.</br>
+Here is anothere example of using this library.  
 As you can see there is a double pendulum shown in the image. However, it is show in both x-y and z-y coordinates (x-y at left and z-y at right). you might feel they are completely different objects but they are just showing one object from two different points of veiw.
 
 ![double pendulum](./images/massspring%20(double%20pendulum).gif)

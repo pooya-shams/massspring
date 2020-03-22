@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name="massspring",
     packages=["massspring"],
-    version='0.0.5',
+    version='0.0.6',
     license='MIT',
     description='A better mass-spring real world simulator with new types of forces(gravity, electricity, spring, collision, ...)',
     long_description=long_description,
@@ -14,7 +14,7 @@ setup(
     author='Pooya Shams kolahi',
     author_email='pooya.shams.k@gmail.com',
     url='https://github.com/pooya-shams/massspring',
-    download_url='https://github.com/pooya-shams/massspring/archive/v0.0.5.tar.gz',
+    download_url='https://github.com/pooya-shams/massspring/archive/v0.0.6.tar.gz',
     keywords=["physics",
               "physics-3d",
               "physics-simulation",
