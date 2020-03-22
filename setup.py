@@ -8,7 +8,7 @@ setup(
     packages=["massspring"],
     version='0.0.6',
     license='MIT',
-    description='A better mass-spring real world simulator with new types of forces(gravity, electricity, spring, collision, ...)',
+    description='A 3D mass-spring real world simulator with more types of forces(gravity, electricity, spring, collision, ...)',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Pooya Shams kolahi',

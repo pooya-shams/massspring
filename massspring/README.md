@@ -14,6 +14,32 @@ more on [project homepage on github](https://github.com/pooya-shams/massspring) 
 licensed under MIT License.
 you can freely use and modify this package, but please let me know if you are doing something interesting.
 
+## Installation
+
+you can install the package via pip:
+
+```bash
+pip install massspring
+```
+
+for user-only installation use `--user` switch:
+
+```bash
+pip install --user massspring
+```
+
+if you have massspring installed and you are wishing to upgrade, you can upgrade via `--upgrade` switch:
+
+```bash
+pip install --upgrade massspring
+```
+
+all combined:
+
+```bash
+pip install --user --upgrade massspring
+```
+
 ## usage
 
 you can import the library by using the following code (it is recommended to import as m or ms)
@@ -131,6 +157,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = '1'
 
 (feel free to complete these tasks)
 
+- [ ] Add position checker to avoid integer too big error of pygame and python itself.
 - [ ] Update the Elastic collision.
 - [ ] Divide the collision to Elastic collision and Inelastic collision.
 - [ ] Create non-sphere/non-mass objects.

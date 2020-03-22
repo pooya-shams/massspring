@@ -13,3 +13,29 @@ more information is available on [project homepage on github](https://github.com
 
 licensed under MIT License.
 you can freely use and modify this package, but please let me know if you are doing something interesting.
+
+## Installation
+
+you can install the package via pip:
+
+```bash
+pip install massspring
+```
+
+for user-only installation use `--user` switch:
+
+```bash
+pip install --user massspring
+```
+
+if you have massspring installed and you are wishing to upgrade, you can upgrade via `--upgrade` switch:
+
+```bash
+pip install --upgrade massspring
+```
+
+all combined:
+
+```bash
+pip install --user --upgrade massspring
+```
