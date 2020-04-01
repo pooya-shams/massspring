@@ -1,6 +1,6 @@
 # massspring
 
-## Author : Pooya.Sh.K
+## Author : Pooya Shams kolahi
 
 Inspired by Saeed Sarkarati
 
