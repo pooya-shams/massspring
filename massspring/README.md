@@ -51,7 +51,7 @@ import massspring as m
 ### mass
 
 mass is the only type of **object** you can create right now.  
-you can create a mass object by using the mass class. you can learn more about the arguments and their usage in the [mass class document](./massspring.py#mass)
+you can create a mass object by using the mass class. you can learn more about the arguments and their usage in the [mass class document](https://github.com/pooya-shams/massspring/blob/master/massspring/massspring.py#mass)
 
 ```python
 m1 = m.mass(x=0, y=0, z=0, vx=0, vy=0, vz=0, m=10, r=10, q=0, moveable=False, solid=True, bound=True, gravitational=False, resistible=False, electrical=False, conductive=False, color=(0, 255, 0), visible=True)
@@ -68,7 +68,7 @@ there are four types of forces (technically force subclass) you can create:
 #### gravity
 
 the gravity class provides a gravity force between two masses according to the **"Newton's law of universal gravitation"** which you can see bellow:  
-![gravity formula](./images/gravity.svg)  
+![gravity formula](https://github.com/pooya-shams/massspring/blob/master/massspring/images/gravity.svg)  
 more information is available at [Newton's law of universal gravitation](https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation) wikipedia page.  
 you can create a gravity force between two masses using the code bellow:
 
@@ -81,7 +81,7 @@ g1 = m.gravity(m1=m1, m2=m2)
 #### electricity
 
 the electricity class provides an electricity force between two masses according to the **"Coulomb's law"** (the vector version) which you can see bellow:  
-![Coulomb's law](./images/Coulomb.svg)  
+![Coulomb's law](https://github.com/pooya-shams/massspring/blob/master/massspring/images/Coulomb.svg)  
 more information is available at [Coulomb's law](https://en.wikipedia.org/wiki/Coulomb%27s_law) wikipedia page.
 you can create an electricity force between two masses using the code bellow:
 
@@ -94,9 +94,9 @@ e1 = m.electricity(m1=m1, m2=m2)
 #### spring
 
 spring can also be known as an object. However, spring class is a subclass of force class. So technically spring is a force. the force will be calculated using the **"Hooke's law"**:  
-![Hooke's law: F=-kx](./images/Hooke.svg)  
+![Hooke's law](https://github.com/pooya-shams/massspring/blob/master/massspring/images/Hooke.svg)  
 more information is available on [Hooke's law](https://en.wikipedia.org/wiki/Hooke%27s_law) wikipedia page.  
-you can create a spring object by using the spring class. you can learn more about the arguments and their usage in the [spring class document](./massspring.py#spring).
+you can create a spring object by using the spring class. you can learn more about the arguments and their usage in the [spring class document](https://github.com/pooya-shams/massspring/blob/master/massspring/massspring.py#spring).
 
 ```python
 s1 = m.spring(k=1500000, l=0, m1=m1, m2=m2, color=(255, 0, 0), visible=True)
@@ -127,20 +127,20 @@ m.mainloop(speed=2, FPS=0, frame=None, *args)
 
 You can see a simple example of using massspring library to create a pendulum.
 It has an acceleration of -g in the Y ordinate.
-!["pendulum"](./images/massspring%20(pendulum).gif)
+!["pendulum"](https://github.com/pooya-shams/massspring/blob/master/massspring/images/massspring%20(pendulum).gif)
 
-available at [example 1](./example%201%20(pendulum).py)
+available at [example 1](https://github.com/pooya-shams/massspring/blob/master/massspring/example%201%20(pendulum).py)
 
 Here is another example of using this library.  
 As you can see there is a double pendulum shown in the image. However, it is show in both x-y and z-y coordinates (x-y at left and z-y at right). you might feel they are completely different objects but they are just showing one object from two different points of view.
 
-![double pendulum](./images/massspring%20(double%20pendulum).gif)
+![double pendulum](https://github.com/pooya-shams/massspring/blob/master/massspring/images/massspring%20(double%20pendulum).gif)
 
-available at [example 2](./example%202%20(double%20pendulum%203d).py).
+available at [example 2](https://github.com/pooya-shams/massspring/blob/master/massspring/example%202%20(double%20pendulum%203d).py).
 
-3.[example 3]("./example%203%20(3d%20pyramid).py")  
-4.[example 4](./example%204%20(rope).py)  
-5.[example 5](./example%205%20(collision).py)  
+3.[example 3](https://github.com/pooya-shams/massspring/blob/master/massspring/example%203%20(3d%20pyramid).py)  
+4.[example 4](https://github.com/pooya-shams/massspring/blob/master/massspring/example%204%20(rope).py)  
+5.[example 5](https://github.com/pooya-shams/massspring/blob/master/massspring/example%205%20(collision).py)  
 
 ## Requirements
 
