@@ -6,7 +6,7 @@ Inspired by Saeed Sarkarati
 
 ## Brief
 
-using this library you can create great simulations of most of physical environments which can be calculated presizely. you can create many types of objects from which "mass" and "spring" are main ones.  
+using this library you can create great simulations of most of physical environments which can be calculated precisely. you can create many types of objects from which "mass" and "spring" are main ones.  
 more on [project homepage on github](https://github.com/pooya-shams/massspring) and [README](https://github.com/pooya-shams/massspring/blob/master/massspring/README.md)
 
 ## license
@@ -51,10 +51,10 @@ import massspring as m
 ### mass
 
 mass is the only type of **object** you can create right now.  
-you can create a mass object by using the mass class. you can learn more about the arguments and their usage in the [mass class documention](./massspring.py#mass)
+you can create a mass object by using the mass class. you can learn more about the arguments and their usage in the [mass class document](./massspring.py#mass)
 
 ```python
-m1 = m.mass(x=0, y=0, z=0, vx=0, vy=0, vz=0, m=10, r=10, q=0, moveable=False, solid=True, bound=True, gravitateable=False, resistable=False, electrical=False, conductive=False, color=(0, 255, 0), visible=True)
+m1 = m.mass(x=0, y=0, z=0, vx=0, vy=0, vz=0, m=10, r=10, q=0, moveable=False, solid=True, bound=True, gravitational=False, resistible=False, electrical=False, conductive=False, color=(0, 255, 0), visible=True)
 ```
 
 ### force
@@ -67,7 +67,7 @@ there are four types of forces (technically force subclass) you can create:
 
 #### gravity
 
-the gravity class provides a gravity force between two masses according to the **"Newoton's law of universal gravitation"** which you can see bellow:  
+the gravity class provides a gravity force between two masses according to the **"Newton's law of universal gravitation"** which you can see bellow:  
 ![gravity formula](./images/gravity.svg)  
 more information is available at [Newton's law of universal gravitation](https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation) wikipedia page.  
 you can create a gravity force between two masses using the code bellow:
@@ -96,7 +96,7 @@ e1 = m.electricity(m1=m1, m2=m2)
 spring can also be known as an object. However, spring class is a subclass of force class. So technically spring is a force. the force will be calculated using the **"Hooke's law"**:  
 ![Hooke's law: F=-kx](./images/Hooke.svg)  
 more information is available on [Hooke's law](https://en.wikipedia.org/wiki/Hooke%27s_law) wikipedia page.  
-you can create a spring object by using the spring class. you can learn more about the arguments and their usage in the [spring class documention](./massspring.py#spring).
+you can create a spring object by using the spring class. you can learn more about the arguments and their usage in the [spring class document](./massspring.py#spring).
 
 ```python
 s1 = m.spring(k=1500000, l=0, m1=m1, m2=m2, color=(255, 0, 0), visible=True)
@@ -131,8 +131,8 @@ It has an acceleration of -g in the Y ordinate.
 
 available at [example 1](./example%201%20(pendulum).py)
 
-Here is anothere example of using this library.  
-As you can see there is a double pendulum shown in the image. However, it is show in both x-y and z-y coordinates (x-y at left and z-y at right). you might feel they are completely different objects but they are just showing one object from two different points of veiw.
+Here is another example of using this library.  
+As you can see there is a double pendulum shown in the image. However, it is show in both x-y and z-y coordinates (x-y at left and z-y at right). you might feel they are completely different objects but they are just showing one object from two different points of view.
 
 ![double pendulum](./images/massspring%20(double%20pendulum).gif)
 

@@ -9,7 +9,7 @@ massspring
 
 using this library you can create great
 simulations of most of physical environments
-which can be calculated presizely.
+which can be calculated precisely.
 you can create many types of objects from which
 "mass" and "spring" are main ones.
 """
@@ -20,7 +20,7 @@ from math import sqrt, pi
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = '1'
 
-# vairables
+# variables
 # physical constants
 """
 dt is delta time -> time difference between two sections; measured in seconds.
@@ -229,7 +229,7 @@ class mass(object):
     """
     the main mass object class.
     ALL attributes are available in the __init__ method.
-    ALL methods are availeble in the class.
+    ALL methods are available in the class.
     no attribute or method will be added
     to objects unless the user adds it to objects.
     """
@@ -237,8 +237,8 @@ class mass(object):
     def __init__(self,
                  x=0, y=0, z=0, vx=0, vy=0, vz=0,
                  m=1, r=1, q=0,
-                 moveable=True, solid=True, bound=True, gravitateable=False,
-                 resistable=False, electrical=False, conductive=False,
+                 moveable=True, solid=True, bound=True, gravitational=False,
+                 resistible=False, electrical=False, conductive=False,
                  color=(255, 255, 255), visible=True):
         """
         parameters:
@@ -253,8 +253,8 @@ class mass(object):
         moveable means if the object can move or not.
         solid means if the object can hit other objects or not.
         bound means if the object stays in the screen or not.
-        gravitateable means if the object is affected by gravity force or not.
-        resistable means if the object is
+        gravitational means if the object is affected by gravity force or not.
+        resistible means if the object is
                 affected by air resistance force or not.
         electrical means if the object is affected by other objects' electrical
                 force and can affect them by electrical force or not.
@@ -287,8 +287,8 @@ class mass(object):
         self.moveable = moveable
         self.solid = solid
         self.bound = bound
-        self.gravitateable = gravitateable
-        self.resistable = resistable
+        self.gravitational = gravitational
+        self.resistible = resistible
         self.electrical = electrical
         self.conductive = conductive
         self.color = color
@@ -362,7 +362,7 @@ class mass(object):
 
     def set_air_resistance_force(self):
         """ sets the air resistance force to the object """
-        if self.resistable:
+        if self.resistible:
             f = self.air_resistance_force()
             v = self.v()
             if v == 0:
@@ -482,7 +482,7 @@ class force(object):
     this class is a raw class used to create other classes of forces.
     the subclasses are 'spring', 'gravity', 'electricity', 'collision'
     since all forces in OUR universe are between two objects, the force
-    class has two 'm1' and 'm2' that the force occures between them.
+    class has two 'm1' and 'm2' that the force occurs between them.
     there are two other attributes too:
     1. name: is just a string of the force name which will be used when
     raising exceptions
@@ -583,7 +583,7 @@ class spring(force):
         m1 and m2 are masses.
         k is the constant of the spring in the Hooke's law.
         nl is the natural length of the spring
-        used to calulate delta x in the Hooke's law.
+        used to calculate delta x in the Hooke's law.
         color and visible: guess!
         """
         self.k = k
@@ -666,7 +666,7 @@ class gravity(force):
         return (G * self.m1.m * self.m2.m) / (h ** 2)
 
     def set_force(self):
-        """ sets the gravity force to the object and its gravital pair """
+        """ sets the gravity force to the object and its gravitational pair """
         f = self.get_force()
         d, dx, dy, dz = self.d()
         if d == 0:
@@ -731,7 +731,7 @@ class electricity(force):
 
     def equalise_charge(self):
         """
-        checks if two objects are conduntive and then
+        checks if two objects are conductive and then
         equalises the electrical charge between them.
         """
         if self.m1.conductive and self.m2.conductive:
@@ -848,7 +848,7 @@ def create_all_collisions():
 def create_all_gravities():
     for i, m1 in enumerate(mass_lis):
         for _, m2 in enumerate(mass_lis[i+1:]):
-            if m1.gravitateable and m2.gravitateable:
+            if m1.gravitational and m2.gravitational:
                 gravity(m1, m2)
 
 
