@@ -14,7 +14,7 @@ setup(
     author='Pooya Shams kolahi',
     author_email='pooya.shams.k@gmail.com',
     url='https://github.com/pooya-shams/massspring',
-    download_url='https://github.com/pooya-shams/massspring/archive/v0.0.6.tar.gz',
+    download_url='https://github.com/pooya-shams/massspring/archive/v0.0.7.tar.gz',
     keywords=["physics",
               "physics-3d",
               "physics-simulation",
