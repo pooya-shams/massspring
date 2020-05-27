@@ -34,6 +34,8 @@ Cd is drag coefficient -> 0.47 for sphere; non-united
 da is ro -> density of air; measured in kg*m^-3
     where kg is kilograms, m is meters.
 ge is earth's gravity acceleration; measured in m*s^-2.
+c is speed of light; measured in m/s where m is meters and s is seconds
+    will be used to check if a mass has exceeded speed limit and raise an error
 """
 dt = .001
 G = 6.67384e-11
@@ -42,6 +44,7 @@ k = 1 / (4 * pi * e0)
 Cd = .47
 da = 1.2
 ge = 9.8
+c = 299792458
 
 # programming variables
 mass_lis = []  # list of all masses
@@ -161,6 +164,10 @@ class NegativeMass(Exception):
 
 
 class NonElectricalConductive(Exception):
+    pass
+
+
+class FasterThanSpeedLimitException(Exception):
     pass
 
 # Warnings
@@ -352,6 +359,12 @@ class mass(object):
             if not (-WIND // 2 + self.r < self.z < WIND // 2 - self.r):
                 self.vz *= -1
 
+    def check_speed_exceeds_limit(self):
+        tmpv = self.v()
+        if tmpv > c:
+            raise FasterThanSpeedLimitException(
+                f"can't go faster than {c}, the speed is {tmpv}")
+
     def move(self):
         """
         moves the object according to
@@ -367,6 +380,7 @@ class mass(object):
             self.vx += ax * dt
             self.vy += ay * dt
             self.vz += az * dt
+            self.check_speed_exceeds_limit()
             self.x += self.vx * dt
             self.y += self.vy * dt
             self.z += self.vz * dt
@@ -900,12 +914,12 @@ def mainloop(speed=2, FPS=0, frame=None, *args):
     DISPLAYSURF = pygame.display.set_mode((WINW * 2 + 1, WINH))
     win_xy = pygame.surface.Surface((WINW, WINH))
     win_zy = pygame.surface.Surface((WINW, WINH))
-    c = 0
-    spa = 1
+    frame_number = 0
+    frames_passing_speed = 1
     updating = True
     initialize()
     while True:
-        c += spa
+        frame_number += frames_passing_speed
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 pygame.quit()
@@ -924,6 +938,6 @@ def mainloop(speed=2, FPS=0, frame=None, *args):
             update()
             if frame is not None:
                 frame(*args)
-        if c % speed == 0:
+        if frame_number % speed == 0:
             display(DISPLAYSURF, win_xy, win_zy)
             pygame.display.update()
