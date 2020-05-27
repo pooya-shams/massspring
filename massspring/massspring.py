@@ -58,6 +58,8 @@ sp = "spring"
 el = "electricity"
 gv = "gravity"
 cl = "collision"
+INT_MIN = -2 ** 31  # -2147483648
+INT_MAX = 2 ** 31 - 1  # +2147483647
 
 
 # graphical variables
@@ -166,11 +168,15 @@ class NegativeMass(Exception):
 class NonElectricalConductive(Exception):
     pass
 
+# Warnings
 
-class FasterThanSpeedLimitException(Exception):
+
+class FasterThanSpeedLimitException(Warning):
     pass
 
-# Warnings
+
+class FurtherThanPositionLimitException(Warning):
+    pass
 
 
 class SamePosition(Warning):
@@ -195,6 +201,25 @@ class position:
     y = WINH // 2
     z = WIND // 2
 
+
+class limit:
+    """ limits for variables and properties of objects """
+    class MIN:
+        x = INT_MIN
+        y = INT_MIN
+        z = INT_MIN
+        vx = -c
+        vy = -c
+        vz = -c
+
+    class MAX:
+        x = INT_MAX
+        y = INT_MAX
+        z = INT_MAX
+        vx = c
+        vy = c
+        vz = c
+        v = c
 
 # objects(physical meaning) classes
 # mass
@@ -361,11 +386,30 @@ class mass(object):
                 self.vz *= -1
 
     def check_speed_exceeds_limit(self):
+        """
+        raises a warning if the mass has reached the speed of light
+        in vacuum which is highest speed an object can have.
+        """
         tmpv = self.v()
-        if tmpv >= c:
+        if tmpv >= limit.MAX.v:  # tmpv is higher than 0
             # the mass has reached the speed of light in vacuum (or MORE)
             raise FasterThanSpeedLimitException(
                 f"can't go faster than {c}, the speed is {tmpv}")
+
+    def check_position_exceeds_limit(self):
+        """
+        raises a warning if the position is
+        higher than INT_MAX or lower than INT_MIN
+        """
+        if not (limit.MIN.x < self.x < limit.MAX.x):
+            raise FurtherThanPositionLimitException(
+                f"can't place mass.x out of ({limit.MIN.x},{limit.MAX.x}), x is {self.x}")
+        if not (limit.MIN.y < self.y < limit.MAX.y):
+            raise FurtherThanPositionLimitException(
+                f"can't place mass.y out of ({limit.MIN.y},{limit.MAX.y}), y is {self.y}")
+        if not (limit.MIN.z < self.z < limit.MAX.z):
+            raise FurtherThanPositionLimitException(
+                f"can't place mass.z out of ({limit.MIN.z},{limit.MAX.z}), z is {self.z}")
 
     def move(self):
         """
@@ -386,6 +430,7 @@ class mass(object):
             self.x += self.vx * dt
             self.y += self.vy * dt
             self.z += self.vz * dt
+            self.check_position_exceeds_limit()
 
     def show_pos_xy(self):
         """ returns the position of the mass on the screen (just x and y) """
