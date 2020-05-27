@@ -351,12 +351,13 @@ class mass(object):
 
     def reflect(self):
         """ reflects the object if it hits the walls """
+        # checking if the mass WILL go out of the screen to avoid it.
         if self.bound:
-            if not (-WINW // 2 + self.r < self.x < WINW // 2 - self.r):
+            if not (-WINW // 2 + self.r < self.x + self.vx * dt < WINW // 2 - self.r):
                 self.vx *= -1
-            if not (-WINH // 2 + self.r < self.y < WINH // 2 - self.r):
+            if not (-WINH // 2 + self.r < self.y + self.vy * dt < WINH // 2 - self.r):
                 self.vy *= -1
-            if not (-WIND // 2 + self.r < self.z < WIND // 2 - self.r):
+            if not (-WIND // 2 + self.r < self.z + self.vz * dt < WIND // 2 - self.r):
                 self.vz *= -1
 
     def check_speed_exceeds_limit(self):
