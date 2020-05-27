@@ -361,7 +361,8 @@ class mass(object):
 
     def check_speed_exceeds_limit(self):
         tmpv = self.v()
-        if tmpv > c:
+        if tmpv >= c:
+            # the mass has reached the speed of light in vacuum (or MORE)
             raise FasterThanSpeedLimitException(
                 f"can't go faster than {c}, the speed is {tmpv}")
 
