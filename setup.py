@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name="massspring",
     packages=["massspring"],
-    version='0.0.6',
+    version='0.0.7',
     license='MIT',
     description='A 3D mass-spring real world simulator with more types of forces(gravity, electricity, spring, collision, ...)',
     long_description=long_description,

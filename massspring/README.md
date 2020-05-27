@@ -157,7 +157,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = '1'
 
 (feel free to complete these tasks)
 
-- [ ] Add position checker to avoid integer too big error of pygame and python itself.
+- [x] Add position checker to avoid integer too big error of pygame and python itself.
 - [ ] Update the Elastic collision.
 - [ ] Divide the collision to Elastic collision and Inelastic collision.
 - [ ] Create non-sphere/non-mass objects.
