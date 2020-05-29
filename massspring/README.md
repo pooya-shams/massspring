@@ -158,7 +158,8 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = '1'
 (feel free to complete these tasks)
 
 - [x] Add position checker to avoid integer too big error of pygame and python itself.
-- [ ] Update the Elastic collision.
+- [x] Update the Elastic collision.
+- [ ] divide massspring.py to separate modules.
 - [ ] Divide the collision to Elastic collision and Inelastic collision.
 - [ ] Create non-sphere/non-mass objects.
 - [ ] Collision between mass and spring (mass: sphere with mass, spring: line without mass).
