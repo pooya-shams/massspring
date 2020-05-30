@@ -159,7 +159,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = '1'
 
 - [x] Add position checker to avoid integer too big error of pygame and python itself.
 - [x] Update the Elastic collision.
-- [ ] divide massspring.py to separate modules.
+- [ ] ~~divide massspring.py to separate modules.~~ (won't be possible because inheritance levels forces each class to import all previous classes and it results in extreme usage of memory because for example mass class and force class will be imported in each file for each force class (spring, gravity, electricity, collision) and it's inefficient)
 - [ ] Divide the collision to Elastic collision and Inelastic collision.
 - [ ] Create non-sphere/non-mass objects.
 - [ ] Collision between mass and spring (mass: sphere with mass, spring: line without mass).
