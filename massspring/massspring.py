@@ -150,8 +150,15 @@ def assert_type_error_list(obj):
     assert type(obj) == list, TypeError(
         "object list must be from type 'list'")
 
-# Exceptions
 
+def similarity(dx1, dy1, dz1, d1, d2):
+    dx2 = d2 * dx1 / d1
+    dy2 = d2 * dy1 / d1
+    dz2 = d2 * dz1 / d1
+    return dx2, dy2, dz2
+
+
+# Exceptions
 
 class ZeroMass(Exception):
     pass
@@ -360,6 +367,12 @@ class mass(object):
         """ sets the objects forces to 0 """
         self.fx, self.fy, self.fz = 0, 0, 0
 
+    def update_forces(self, fx, fy, fz):
+        """ adds the given forces to the mass """
+        self.fx += fx
+        self.fy += fy
+        self.fz += fz
+
     def set_air_resistance_force(self):
         """ sets the air resistance force to the object """
         if self.resistible:
@@ -367,12 +380,10 @@ class mass(object):
             v = self.v()
             if v == 0:
                 return
-            fx = f * self.vx / v
-            fy = f * self.vy / v
-            fz = f * self.vz / v
-            self.fx -= fx
-            self.fy -= fy
-            self.fz -= fz
+            fx = -f * self.vx / v
+            fy = -f * self.vy / v
+            fz = -f * self.vz / v
+            self.update_forces(fx, fy, fz)
 
     def reflect(self):
         """ reflects the object if it hits the walls """
@@ -607,17 +618,14 @@ class spring(force):
     def set_forces(self):
         """ enters the force to the masses. """
         f = self.force()
-        r, dx, dy, dz = self.d()
-        if r == 0:
+        d, dx, dy, dz = self.d()
+        if d == 0:
             return 0
         m1 = self.m1
         m2 = self.m2
-        m1.fx += f * (dx) / r
-        m1.fy += f * (dy) / r
-        m1.fz += f * (dz) / r
-        m2.fx += f * (-dx) / r
-        m2.fy += f * (-dy) / r
-        m2.fz += f * (-dz) / r
+        fx, fy, fz = similarity(dx, dy, dz, d, f)
+        m1.update_forces(fx, fy, fz)
+        m2.update_forces(-fx, -fy, -fz)
 
     def show_xy(self, win):
         """ method for showing the spring on the screen of x-y coordinates. """
@@ -671,15 +679,9 @@ class gravity(force):
         d, dx, dy, dz = self.d()
         if d == 0:
             return 0
-        fx = f * dx / d
-        fy = f * dy / d
-        fz = f * dz / d
-        self.m1.fx -= fx
-        self.m1.fy -= fy
-        self.m1.fz -= fz
-        self.m2.fx += fx
-        self.m2.fy += fy
-        self.m2.fz += fz
+        fx, fy, fz = similarity(dx, dy, dz, d, f)
+        self.m1.update_forces(-fx, -fy, -fz)
+        self.m2.update_forces(fx, fy, fz)
 
 # electricity
 
@@ -719,15 +721,10 @@ class electricity(force):
         if d == 0:
             return 0
         re = self.re()
-        fx = f * dx / d * re
-        fy = f * dy / d * re
-        fz = f * dz / d * re
-        self.m1.fx += fx
-        self.m1.fy += fy
-        self.m1.fz += fz
-        self.m2.fx -= fx
-        self.m2.fy -= fy
-        self.m2.fz -= fz
+        fx, fy, fz = similarity(dx, dy, dz, d, f)
+        fx, fy, fz = fx * re, fy * re, fz * re
+        self.m1.update_forces(fx, fy, fz)
+        self.m2.update_forces(-fx, -fy, -fz)
 
     def equalise_charge(self):
         """
@@ -736,7 +733,7 @@ class electricity(force):
         """
         if self.m1.conductive and self.m2.conductive:
             q = (self.m1.q + self.m2.q) / 2
-            self.q = q
+            self.m1.q = q
             self.m2.q = q
 
 # collision
@@ -784,12 +781,8 @@ class collision(force):
         v1 = (u1 * (m1 - m2) + u2 * 2 * m2) / (m1 + m2)
         v2 = (u2 * (m2 - m1) + u1 * 2 * m1) / (m1 + m2)
         # dividing v to vx, vy, vz
-        v1x = v1 * dx / d
-        v1y = v1 * dy / d
-        v1z = v1 * dz / d
-        v2x = v2 * -dx / d
-        v2y = v2 * -dy / d
-        v2z = v2 * -dz / d
+        v1x, v1y, v1z = similarity(dx, dy, dz, d, v1)
+        v2x, v2y, v2z = similarity(-dx, -dy, -dz, d, v2)
         # calculating delta v
         dv1x = v1x - u1x
         dv1y = v1y - u1y
@@ -804,13 +797,11 @@ class collision(force):
         a2x = dv2x / dt
         a2y = dv2y / dt
         a2z = dv2z / dt
-        # calculating and adding forces
-        self.m1.fx += a1x * m1
-        self.m1.fy += a1y * m1
-        self.m1.fz += a1z * m1
-        self.m2.fx += a2x * m2
-        self.m2.fy += a2y * m2
-        self.m2.fz += a2z * m2
+        # calculating forces
+        fx1, fy1, fz1 = a1x * m1, a1y * m1, a1z * m1
+        fx2, fy2, fz2 = a2x * m2, a2y * m2, a2z * m2
+        self.m1.update_forces(fx1, fy1, fz1)
+        self.m2.update_forces(fx2, fy2, fz2)
         # the collision is done!
         # equalising the electrical charges of two objects
         # (if they are conductive)
