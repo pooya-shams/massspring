@@ -129,18 +129,18 @@ You can see a simple example of using massspring library to create a pendulum.
 It has an acceleration of -g in the Y ordinate.
 !["pendulum"](https://raw.githubusercontent.com/pooya-shams/massspring/master/massspring/images/massspring%20(pendulum).gif)
 
-available at [example 1](https://github.com/pooya-shams/massspring/blob/master/massspring/example%201%20(pendulum).py)
+available at [example 1](https://github.com/pooya-shams/massspring-examples/blob/master/example%201%20(pendulum).py)
 
 Here is another example of using this library.  
 As you can see there is a double pendulum shown in the image. However, it is show in both x-y and z-y coordinates (x-y at left and z-y at right). you might feel they are completely different objects but they are just showing one object from two different points of view.
 
 ![double pendulum](https://raw.githubusercontent.com/pooya-shams/massspring/master/massspring/images/massspring%20(double%20pendulum).gif)
 
-available at [example 2](https://github.com/pooya-shams/massspring/blob/master/massspring/example%202%20(double%20pendulum%203d).py).
+available at [example 2](https://github.com/pooya-shams/massspring-examples/blob/master/example%202%20(double%20pendulum%203d).py).
 
-3.[example 3](https://github.com/pooya-shams/massspring/blob/master/massspring/example%203%20(3d%20pyramid).py)  
-4.[example 4](https://github.com/pooya-shams/massspring/blob/master/massspring/example%204%20(rope).py)  
-5.[example 5](https://github.com/pooya-shams/massspring/blob/master/massspring/example%205%20(collision).py)  
+3.[example 3](https://github.com/pooya-shams/massspring-examples/blob/master/example%203%20(3d%20pyramid).py)  
+4.[example 4](https://github.com/pooya-shams/massspring-examples/blob/master/example%204%20(rope).py)  
+5.[example 5](https://github.com/pooya-shams/massspring-examples/blob/master/example%205%20(collision).py)  
 
 ## Requirements
 
