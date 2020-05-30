@@ -14,29 +14,27 @@ you can create many types of objects from which
 "mass" and "spring" are main ones.
 """
 
-import warnings
 import pygame
-from math import sqrt, pi
-import os
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = '1'
+from math import pi, sqrt
+import warnings
+
 
 # variables
 # physical constants
-"""
-dt is delta time -> time difference between two sections; measured in seconds.
-G is newtonian constant of gravitation; measured in m^3*kg^-1*s^-2 or
-    N*m^2*kg^-2 where m is meters, kg is kilograms, s is seconds, N is newtons.
-e0 is vacuum permittivity; measured in m^-2*N^-1*C^2 where m is meters,
-    N is newton, C is coulomb.
-k is coulomb constant(electrostatic constant); measured in m^2*N*C^-2
-    where m is meters, N is newton, C is coulomb.
-Cd is drag coefficient -> 0.47 for sphere; non-united
-da is ro -> density of air; measured in kg*m^-3
-    where kg is kilograms, m is meters.
-ge is earth's gravity acceleration; measured in m*s^-2.
-c is speed of light; measured in m/s where m is meters and s is seconds
-    will be used to check if a mass has exceeded speed limit and raise an error
-"""
+# dt is delta time -> time difference between two sections; measured in seconds.
+# G is newtonian constant of gravitation; measured in m^3*kg^-1*s^-2 or
+#     N*m^2*kg^-2 where m is meters, kg is kilograms, s is seconds, N is newtons.
+# e0 is vacuum permittivity; measured in m^-2*N^-1*C^2 where m is meters,
+#     N is newton, C is coulomb.
+# k is coulomb constant(electrostatic constant); measured in m^2*N*C^-2
+#     where m is meters, N is newton, C is coulomb.
+# Cd is drag coefficient -> 0.47 for sphere; non-united
+# da is ro -> density of air; measured in kg*m^-3
+#     where kg is kilograms, m is meters.
+# ge is earth's gravity acceleration; measured in m*s^-2.
+# c is speed of light; measured in m/s where m is meters and s is seconds
+#     will be used to check if a mass has exceeded speed limit and raise an error
+
 dt = .001
 G = 6.67384e-11
 e0 = 8.854187817e-12
@@ -66,59 +64,6 @@ INT_MAX = 2 ** 31 - 1  # +2147483647
 WINW = 600  # window width  (_)
 WINH = 600  # window height (|)
 WIND = 600  # window depth  (.)
-
-# colors [= ( R ,  G ,  B )]
-WHITE = (255, 255, 255)
-SMOKE = (225, 224, 224)
-DARK_SMOKE = (192, 192, 192)
-SILVER = (157, 157, 157)
-GREY = (128, 128, 128)
-GRAY = GREY
-BLUE_GREY = (94, 124, 139)
-BLUE_GRAY = BLUE_GREY
-BLACK = (0,   0,   0)
-DARK_RED = (128,   0,   0)
-PURE_RED = (255,   0,   0)
-RED = (246,  64,  44)
-PINK = (235,  19,  96)
-PURE_PINK = (255,   0, 128)
-ROSE = (246,  39, 157)
-MAGENTA = (255,   0, 255)
-VIOLET = (238, 130, 239)
-PURPLE = (156,  26, 177)
-PURE_PURPLE = (128,   0, 128)
-DARK_PURPLE = (102,  51, 185)
-INDEGO = (61,  76, 183)
-DARK_BLUE = (0,   0, 128)
-NAVY = DARK_BLUE
-BLUE = (15, 147, 245)
-PURE_BLUE = (0,   0, 255)
-WATER = (0, 166, 246)
-SKY = (140, 220, 250)
-PURE_CYAN = (0, 255, 255)
-AQUA = PURE_CYAN
-CYAN = (0, 187, 213)
-TEAL = (0, 149, 135)
-DARK_CYAN = (0, 128, 128)
-DARK_GREEN = (0, 128,   0)
-GREEN = (70, 175,  74)
-GRASS = (136, 196,  64)
-PURE_GREEN = (0, 255,   0)
-OLIVE = (128, 128,   0)
-LIME = (204, 221,  30)
-YELLOW = (255, 236,  22)
-PURE_YELLOW = (255, 255,   0)
-GOLD = (252, 214,   3)
-PURE_ORANGE = (255, 192,   0)
-AMBER = PURE_ORANGE
-ORANGE = (255, 151,   0)
-DARK_ORANGE = (255,  85,   3)
-BROWN = (121,  84,  70)
-LIGHT_CHOCOLATE = (133,  85,  56)
-PURE_BROWN = (128,  64,   0)
-CHOCOLATE = (105,  58,  42)
-DARK_CHOCOLATE = (72,  51,  50)
-WHITE_CHOCOLATE = (234, 225, 201)
 
 
 # functions

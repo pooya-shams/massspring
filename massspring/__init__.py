@@ -1,1 +1,2 @@
-from .massspring import *
+from massspring.massspring import *
+import massspring.colors
