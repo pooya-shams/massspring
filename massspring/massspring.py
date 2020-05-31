@@ -17,6 +17,7 @@ you can create many types of objects from which
 import pygame
 from math import pi, sqrt
 import warnings
+import massspring.Exceptions as Exceptions
 
 
 # variables
@@ -80,7 +81,7 @@ def sign(x):
 
 
 def warn_same_pos(m1, m2):
-    warnings.warn(SamePosition(
+    warnings.warn(Exceptions.SamePosition(
         same_pos_warn_message %
         (m1, m2, m1._index(), m2._index())))
 
@@ -102,37 +103,6 @@ def similarity(dx1, dy1, dz1, d1, d2):
     dz2 = d2 * dz1 / d1
     return dx2, dy2, dz2
 
-
-# Exceptions
-
-class ZeroMass(Exception):
-    pass
-
-
-class ZeroRadius(Exception):
-    pass
-
-
-class NegativeMass(Exception):
-    pass
-
-
-class NonElectricalConductive(Exception):
-    pass
-
-# Warnings
-
-
-class FasterThanSpeedLimitException(Warning):
-    pass
-
-
-class FurtherThanPositionLimitException(Warning):
-    pass
-
-
-class SamePosition(Warning):
-    pass
 
 # variable holders (namespaces)
 
@@ -216,14 +186,16 @@ class mass(object):
                 visible means if the object is seen or not.
         """
         if m == 0:
-            raise ZeroMass("Can't produce an object with zero mass")
+            raise Exceptions.ZeroMass("Can't produce an object with zero mass")
         if m < 0:
-            raise NegativeMass(
+            raise Exceptions.NegativeMass(
                 "Can't produce an object with negative mass : %d" % m)
         if r == 0:
-            raise ZeroRadius("Can't produce an object with zero radius")
+            raise Exceptions.ZeroRadius(
+                "Can't produce an object with zero radius")
         if not electrical and conductive:
-            raise NonElectricalConductive("Not electrical but conductive")
+            raise Exceptions.NonElectricalConductive(
+                "Not electrical but conductive")
         self.x = x
         self.y = y
         self.z = z
@@ -349,8 +321,8 @@ class mass(object):
         tmpv = self.v()
         if tmpv >= limit.MAX.v:  # tmpv is higher than 0
             # the mass has reached the speed of light in vacuum (or MORE)
-            raise FasterThanSpeedLimitException(
-                f"can't go faster than {c}, the speed is {tmpv}")
+            warnings.warn(Exceptions.FasterThanSpeedLimitException(
+                f"can't go faster than {c}, the speed is {tmpv}"))
 
     def check_position_exceeds_limit(self):
         """
@@ -358,14 +330,14 @@ class mass(object):
         higher than INT_MAX or lower than INT_MIN
         """
         if not (limit.MIN.x < self.x < limit.MAX.x):
-            raise FurtherThanPositionLimitException(
-                f"can't place mass.x out of ({limit.MIN.x},{limit.MAX.x}), x is {self.x}")
+            warnings.warn(Exceptions.FurtherThanPositionLimitException(
+                f"can't place mass.x out of ({limit.MIN.x},{limit.MAX.x}), x is {self.x}"))
         if not (limit.MIN.y < self.y < limit.MAX.y):
-            raise FurtherThanPositionLimitException(
-                f"can't place mass.y out of ({limit.MIN.y},{limit.MAX.y}), y is {self.y}")
+            warnings.warn(Exceptions.FurtherThanPositionLimitException(
+                f"can't place mass.y out of ({limit.MIN.y},{limit.MAX.y}), y is {self.y}"))
         if not (limit.MIN.z < self.z < limit.MAX.z):
-            raise FurtherThanPositionLimitException(
-                f"can't place mass.z out of ({limit.MIN.z},{limit.MAX.z}), z is {self.z}")
+            warnings.warn(Exceptions.FurtherThanPositionLimitException(
+                f"can't place mass.z out of ({limit.MIN.z},{limit.MAX.z}), z is {self.z}"))
 
     def move(self):
         """
