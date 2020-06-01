@@ -14,11 +14,12 @@ you can create many types of objects from which
 "mass" and "spring" are main ones.
 """
 
-import pygame
-from math import pi, sqrt
+import functools
 import warnings
-import massspring.Exceptions as Exceptions
+from math import pi, hypot
 
+import massspring.Exceptions as Exceptions
+import pygame
 
 # variables
 # physical constants
@@ -51,12 +52,14 @@ spring_lis = []  # list of all springs
 gravity_lis = []  # list of all gravity forces
 electricity_lis = []  # list of all electricity forces
 collision_lis = []  # list of all possible collisions made by masses
+air_resistance_lis = []  # list of masses having air resistance force enabled
 same_pos_warn_message = "Objects %s and %s with indexes of %d and %d in\
- the list mass_lis are at the same position"
+ the list mass_lis are at the same position. can't set %s force to them."
 sp = "spring"
 el = "electricity"
 gv = "gravity"
 cl = "collision"
+ar = "air resistance"
 INT_MIN = -2 ** 31  # -2147483648
 INT_MAX = 2 ** 31 - 1  # +2147483647
 
@@ -68,40 +71,56 @@ WIND = 600  # window depth  (.)
 
 
 # functions
-def hypot3d(x, y, z):
-    return sqrt(x ** 2 + y ** 2 + z ** 2)
-
 
 def sign(x):
+    """ returns the sign of x -> -1, 0, 1 """
     if x < 0:
         return -1
-    elif x > 0:
+    if x > 0:
         return 1
     return 0
 
 
-def warn_same_pos(m1, m2):
+def warn_same_pos(m1, m2, name):
+    """ warns when two masses are exactly on the same position """
     warnings.warn(Exceptions.SamePosition(
         same_pos_warn_message %
-        (m1, m2, m1._index(), m2._index())))
+        (m1, m2, m1._index(), m2._index(), name)))
 
 
-def assert_type_error_mass(obj1, obj2, name):
-    assert type(obj1) == type(obj2) == mass, TypeError(
-        f"can't set {name} force to objects of type\
- {type(obj1)} and {type(obj2)}\nthey must be from type 'mass'")
-
-
-def assert_type_error_list(obj):
-    assert type(obj) == list, TypeError(
-        "object list must be from type 'list'")
+def assert_type_error(*objects, preferred_type=None, name="", msg=""):
+    """
+    makes sure that all the objects passed
+    to the function are of preferred type
+    """
+    assert all(map(lambda obj: type(obj) == preferred_type, objects)), TypeError(
+        f"object {name} -> {objects} should all be of type '{preferred_type}' not '{list(map(type, objects))}'.{msg} ")
 
 
 def similarity(dx1, dy1, dz1, d1, d2):
+    """
+    uses the rules of similarity in geometry to calculate lengths
+    of edges of a pyramid similar to another pyramid
+    """
     dx2 = d2 * dx1 / d1
     dy2 = d2 * dy1 / d1
     dz2 = d2 * dz1 / d1
     return dx2, dy2, dz2
+
+
+# decorators
+
+def two_object_force(func):
+    """
+    makes sure that the second object in a force subclass
+    is not None so we can return the dx, dy and dz
+    """
+    @functools.wraps(func)
+    def wrapper(self):
+        if self.m2 is None:
+            return 0
+        return func(self)
+    return wrapper
 
 
 # variable holders (namespaces)
@@ -127,6 +146,7 @@ class position:
 class limit:
     """ limits for variables and properties of objects """
     class MIN:
+        """ the minimums """
         x = INT_MIN
         y = INT_MIN
         z = INT_MIN
@@ -135,6 +155,7 @@ class limit:
         vz = -c
 
     class MAX:
+        """ the maximums """
         x = INT_MAX
         y = INT_MAX
         z = INT_MAX
@@ -147,13 +168,35 @@ class limit:
 # mass
 
 
-class mass(object):
+class mass:
     """
     the main mass object class.
     ALL attributes are available in the __init__ method.
     ALL methods are available in the class.
     no attribute or method will be added
     to objects unless the user adds it to objects.
+
+    parameters / attributes:
+    x, y, z are the object's position.
+    vx, vy, vz are the object's velocity.
+    fx, fy, fz are the sum of forces entered to the object.
+        they will be added by calling the set_force method
+        in each force's object to the force's masses (m1, m2).
+    m is mass of object.
+    r is radius of object (each mass is consumed as a sphere).
+    q is electrical charge of the object.
+    moveable means if the object can move or not.
+    solid means if the object can hit other objects or not.
+    bound means if the object stays in the screen or not.
+    gravitational means if the object is affected by gravity force or not.
+    resistible means if the object is
+        affected by air resistance force or not.
+    electrical means if the object is affected by other objects' electrical
+        force and can affect them by electrical force or not.
+    conductive means if the object will share
+        electrical charge with others or not.
+    color is the objects default color.
+        visible means if the object is seen or not.
     """
 
     def __init__(self,
@@ -162,29 +205,6 @@ class mass(object):
                  moveable=True, solid=True, bound=True, gravitational=False,
                  resistible=False, electrical=False, conductive=False,
                  color=(255, 255, 255), visible=True):
-        """
-        parameters:
-        x, y, z are the object's position.
-        vx, vy, vz are the object's velocity.
-        fx, fy, fz are the sum of forces entered to the object.
-            they will be added by calling the set_force method
-            in each force's object to the force's masses (m1, m2).
-        m is mass of object.
-        r is radius of object (each mass is consumed as a sphere).
-        q is electrical charge of the object.
-        moveable means if the object can move or not.
-        solid means if the object can hit other objects or not.
-        bound means if the object stays in the screen or not.
-        gravitational means if the object is affected by gravity force or not.
-        resistible means if the object is
-                affected by air resistance force or not.
-        electrical means if the object is affected by other objects' electrical
-                force and can affect them by electrical force or not.
-        conductive means if the object will share
-                electrical charge with others or not.
-        color is the objects default color.
-                visible means if the object is seen or not.
-        """
         if m == 0:
             raise Exceptions.ZeroMass("Can't produce an object with zero mass")
         if m < 0:
@@ -221,39 +241,20 @@ class mass(object):
 
     def _index(self):
         """ returns the index of the object in the mass_lis """
-        for i, mass in enumerate(mass_lis):
-            if mass == self:
+        for i, m in enumerate(mass_lis):
+            if m == self:
                 return i
 
     def __del__(self):
         """ deletes the mass and removes it from mass list """
         try:
-            mass_lis.pop(self._index())
+            mass_lis.remove(self)
         except Exception as e:
             print("[!] Error when deleting : "+str(e))
 
     def v(self):
         """ returns the velocity of the object """
-        return hypot3d(self.vx, self.vy, self.vz)
-
-    def ax(self):
-        """ returns the acceleration in direction of x """
-        return self.vx / dt
-
-    def ay(self):
-        """ returns the acceleration in direction of y """
-        return self.vy / dt
-
-    def az(self):
-        """ returns the acceleration in direction of z """
-        return self.vz / dt
-
-    def a(self):
-        """ returns the acceleration """
-        ax = self.ax()
-        ay = self.ay()
-        az = self.az()
-        return hypot3d(ax, ay, az), ax, ay, az
+        return hypot(self.vx, self.vy, self.vz)
 
     def A(self):
         """
@@ -264,21 +265,7 @@ class mass(object):
 
     def f(self):
         """ returns the force of the object from all directions """
-        return hypot3d(self.fx, self.fy, self.fz)
-
-    def force(self):
-        """
-        returns the force of the object
-        according to newtons second law f=ma
-        """
-        return self.m * self.a()[0]
-
-    def air_resistance_force(self):
-        """
-        returns the force that is entered to the object because of
-        air resistance according to f = p*v^2*C*A/2
-        """
-        return da * self.v() ** 2 * Cd * self.A() / 2
+        return hypot(self.fx, self.fy, self.fz)
 
     def empty_forces(self):
         """ sets the objects forces to 0 """
@@ -290,27 +277,15 @@ class mass(object):
         self.fy += fy
         self.fz += fz
 
-    def set_air_resistance_force(self):
-        """ sets the air resistance force to the object """
-        if self.resistible:
-            f = self.air_resistance_force()
-            v = self.v()
-            if v == 0:
-                return
-            fx = -f * self.vx / v
-            fy = -f * self.vy / v
-            fz = -f * self.vz / v
-            self.update_forces(fx, fy, fz)
-
     def reflect(self):
         """ reflects the object if it hits the walls """
         # checking if the mass WILL go out of the screen to avoid it.
         if self.bound:
-            if not (-WINW // 2 + self.r < self.x + self.vx * dt < WINW // 2 - self.r):
+            if not -WINW // 2 + self.r < self.x + self.vx * dt < WINW // 2 - self.r:
                 self.vx *= -1
-            if not (-WINH // 2 + self.r < self.y + self.vy * dt < WINH // 2 - self.r):
+            if not -WINH // 2 + self.r < self.y + self.vy * dt < WINH // 2 - self.r:
                 self.vy *= -1
-            if not (-WIND // 2 + self.r < self.z + self.vz * dt < WIND // 2 - self.r):
+            if not -WIND // 2 + self.r < self.z + self.vz * dt < WIND // 2 - self.r:
                 self.vz *= -1
 
     def check_speed_exceeds_limit(self):
@@ -329,13 +304,13 @@ class mass(object):
         raises a warning if the position is
         higher than INT_MAX or lower than INT_MIN
         """
-        if not (limit.MIN.x < self.x < limit.MAX.x):
+        if not limit.MIN.x < self.x < limit.MAX.x:
             warnings.warn(Exceptions.FurtherThanPositionLimitException(
                 f"can't place mass.x out of ({limit.MIN.x},{limit.MAX.x}), x is {self.x}"))
-        if not (limit.MIN.y < self.y < limit.MAX.y):
+        if not limit.MIN.y < self.y < limit.MAX.y:
             warnings.warn(Exceptions.FurtherThanPositionLimitException(
                 f"can't place mass.y out of ({limit.MIN.y},{limit.MAX.y}), y is {self.y}"))
-        if not (limit.MIN.z < self.z < limit.MAX.z):
+        if not limit.MIN.z < self.z < limit.MAX.z:
             warnings.warn(Exceptions.FurtherThanPositionLimitException(
                 f"can't place mass.z out of ({limit.MIN.z},{limit.MAX.z}), z is {self.z}"))
 
@@ -400,72 +375,80 @@ class mass(object):
             self.show_xy(win_xy)
             self.show_zy(win_zy)
 
+
 # Force's classes
 # main force
 
-
-class force(object):
+class force:
     """
     the main force class.
     this class is a raw class used to create other classes of forces.
     the subclasses are 'spring', 'gravity', 'electricity', 'collision'
-    since all forces in OUR universe are between two objects, the force
-    class has two 'm1' and 'm2' that the force occurs between them.
+    and air_resistance. since all forces in OUR universe are between
+    two objects, the force class has two 'm1' and 'm2' that the force
+    occurs between them. However we don't have the second object in some
+    forces like air resistance and we just calculate the result of these
+    forces on one object so the m2 attribute is set to None in these cases,
+    meaning that we don't have any second object and we are just using the
+    first one.
+
     there are two other attributes too:
     1. name: is just a string of the force name which will be used when
     raising exceptions
     2. object_list: is the list containing all of the forces of the same type.
-    """
 
-    def __init__(self, m1: mass, m2: mass, name: str, object_list: list):
-        """
-        takes four parameters:
-        1. m1: first mass the force will be assigned to.
-        2. m2: second mass.
-        3. name: is just a string of the force name which will be used when
-        raising exceptions
-        4. object_list: is the list containing
-        all of the forces of the same type.
-        the object will be appended to the list after being created.
-        """
-        assert_type_error_mass(m1, m2, name)
-        assert_type_error_list(object_list)
+    takes three parameters:
+    1. m1: first mass the force will be assigned to.
+    2. m2: second mass.
+    3. name: is just a string of the force name which will be used when
+    raising exceptions
+    """
+    object_list: list
+
+    def __init__(self, *, m1: mass, m2: mass = None, name: str = ""):
+        if m2 is not None:
+            assert_type_error(m1, m2,
+                              preferred_type=mass,
+                              name="m1 and m2",
+                              msg=f"can't set {name} force to them.")
+        else:
+            assert_type_error(m1,
+                              preferred_type=mass,
+                              name="m1",
+                              msg=f"can't set {name} force to it.")
+        assert_type_error(self.object_list,
+                          preferred_type=list,
+                          name="object_list",
+                          msg=f"can't append a {name} force to it.")
+
         self.m1 = m1
         self.m2 = m2
         self.name = name
-        self.object_list = object_list
         self.object_list.append(self)
-
-    def _index(self):
-        """
-        returns the index of the object in the object_list.
-        used when delleting the object so it will be
-        removed from the object_list
-        """
-        for i, f in enumerate(self.object_list):
-            if f == self:
-                return i
-        return -1
 
     def __del__(self):
         """ tries to remove the object from it's object_list """
         try:
-            self.object_list.pop(self._index())
+            self.object_list.remove(self)
         except Exception as e:
             print("[!] Error when deleting : "+str(e))
 
+    @two_object_force
     def dx(self):
         """ returns the delta x of first object and second object """
         return self.m1.x - self.m2.x
 
+    @two_object_force
     def dy(self):
         """ returns the delta y of first object and second object """
         return self.m1.y - self.m2.y
 
+    @two_object_force
     def dz(self):
         """ returns the delta z of first object and second object """
         return self.m1.z - self.m2.z
 
+    @two_object_force
     def d(self):
         """
         returns the distance between first object
@@ -474,11 +457,12 @@ class force(object):
         dx = self.dx()
         dy = self.dy()
         dz = self.dz()
-        d = hypot3d(dx, dy, dz)
+        d = hypot(dx, dy, dz)
         if d == 0:
-            warn_same_pos(self.m1, self.m2)
+            warn_same_pos(self.m1, self.m2, self.name)
         return d, dx, dy, dz
 
+    @two_object_force
     def h(self):
         """
         just returns the distance between
@@ -486,6 +470,7 @@ class force(object):
         """
         return self.d()[0]
 
+# double mass forces
 # spring
 
 
@@ -502,18 +487,11 @@ class spring(force):
     visible (boolean): indicates if the object
     will be shown on the screen or not.
     """
+    object_list = spring_lis
 
     def __init__(self, m1: mass, m2: mass, k=1,
                  nl=0, color=(255, 255, 255), visible=True):
-        force.__init__(self, m1, m2, sp, spring_lis)
-        """
-        parameter:
-        m1 and m2 are masses.
-        k is the constant of the spring in the Hooke's law.
-        nl is the natural length of the spring
-        used to calculate delta x in the Hooke's law.
-        color and visible: guess!
-        """
+        super().__init__(m1=m1, m2=m2, name=sp)
         self.k = k
         self.nl = nl
         if nl == 0:
@@ -528,13 +506,13 @@ class spring(force):
         """
         return self.h()
 
-    def force(self):
+    def get_force(self):
         """ calculates the force which should be entered to the masses. """
         return - self.k * (self.length() - self.nl)
 
-    def set_forces(self):
+    def set_force(self):
         """ enters the force to the masses. """
-        f = self.force()
+        f = self.get_force()
         d, dx, dy, dz = self.d()
         if d == 0:
             return 0
@@ -572,13 +550,18 @@ class gravity(force):
     the main gravity force class.
     uses the newton's law of gravity.
     """
+    object_list = gravity_lis
 
     def __init__(self, m1: mass, m2: mass):
         """
         parameters:
         m1 and m2: masses.
         """
-        force.__init__(self, m1, m2, gv, gravity_lis)
+        super().__init__(m1=m1, m2=m2, name=gv)
+
+    @staticmethod
+    def condition(m1: mass, m2: mass):
+        return m1.gravitational and m2.gravitational
 
     def get_force(self):
         """
@@ -605,17 +588,22 @@ class gravity(force):
 
 class electricity(force):
     """
-    the main force class.
+    the main electricity force class.
     uses the Coulomb law for calculating
     the electricity force between two particles.
     """
+    object_list = electricity_lis
 
     def __init__(self, m1: mass, m2: mass):
         """
         parameters:
         m1 and m2: masses.
         """
-        force.__init__(self, m1, m2, el, electricity_lis)
+        super().__init__(m1=m1, m2=m2, name=el)
+
+    @staticmethod
+    def condition(m1: mass, m2: mass):
+        return m1.electrical and m2.electrical
 
     def get_force(self):
         """
@@ -663,9 +651,14 @@ class collision(force):
     I don't know why it works but according to wikipedia
     the formula and equation are driven from these two equations.
     """
+    object_list = collision_lis
 
     def __init__(self, m1: mass, m2: mass):
-        force.__init__(self, m1, m2, cl, collision_lis)
+        super().__init__(m1=m1, m2=m2, name=cl)
+
+    @staticmethod
+    def condition(m1: mass, m2: mass):
+        return m1.solid and m2.solid
 
     def check_collision(self):
         """ checks if two objects are collided or not """
@@ -674,7 +667,7 @@ class collision(force):
             return True
         return False
 
-    def collide(self):
+    def set_force(self):
         """ collides two objects """
         # checking if the objects has collided
         if not self.check_collision():
@@ -724,28 +717,75 @@ class collision(force):
         # (if they are conductive)
         electricity.equalise_charge(self)
 
+# single mass forces
+# air resistance
+
+
+class air_resistance(force):
+    """
+    air resistance force class
+    calculates the air resistance force entered to an object by
+    the following formula and enters that force to the object.
+    f = (p * v^2 * C * A) / 2
+    """
+    object_list = air_resistance_lis
+
+    def __init__(self, m1: mass):
+        super().__init__(m1=m1, name=ar)
+
+    @staticmethod
+    def condition(m1):
+        return m1.resistible
+
+    def get_force(self):
+        """
+        returns the force that is entered to the object because of
+        air resistance according to f = p*v^2*C*A/2
+        """
+        return da * self.m1.v() ** 2 * Cd * self.m1.A() / 2
+
+    def set_force(self):
+        """ sets the air resistance force to the object """
+        f = self.get_force()
+        v = self.m1.v()
+        if v == 0:
+            return 0
+        fx = -f * self.m1.vx / v
+        fy = -f * self.m1.vy / v
+        fz = -f * self.m1.vz / v
+        self.m1.update_forces(fx, fy, fz)
+
+
+# other variables
+automated = "automated"
+manual = "manual"
+one_forced = "one forced"
+automated_two_object_forces = [gravity, electricity, collision]
+automated_one_object_forces = [air_resistance]
+manual_two_object_forces = [spring]
+all_forces = {
+    automated: automated_two_object_forces,
+    one_forced: automated_one_object_forces,
+    manual: manual_two_object_forces,
+}
+
+
 # other functions
 
 
-def create_all_collisions():
+def create_all_automated_forces():
+    """
+    searches all the masses and creates force objects for
+    each pair of the masses that the force applies to them
+    """
     for i, m1 in enumerate(mass_lis):
-        for _, m2 in enumerate(mass_lis[i+1:]):
-            if m1.solid and m2.solid:
-                collision(m1, m2)
-
-
-def create_all_gravities():
-    for i, m1 in enumerate(mass_lis):
-        for _, m2 in enumerate(mass_lis[i+1:]):
-            if m1.gravitational and m2.gravitational:
-                gravity(m1, m2)
-
-
-def create_all_electricities():
-    for i, m1 in enumerate(mass_lis):
-        for _, m2 in enumerate(mass_lis[i+1:]):
-            if m1.electrical and m2.electrical:
-                electricity(m1, m2)
+        for _, m2 in enumerate(mass_lis[i + 1:]):
+            for f in automated_two_object_forces:
+                if f.condition(m1, m2):
+                    f(m1, m2)
+        for f in automated_one_object_forces:
+            if f.condition(m1):
+                f(m1)
 
 
 def empty_all_forces():
@@ -753,36 +793,11 @@ def empty_all_forces():
         m.empty_forces()
 
 
-def set_all_spring_forces():
-    for s in spring_lis:
-        s.set_forces()
-
-
-def collide_all():
-    for col in collision_lis:
-        col.collide()
-
-
-def set_all_gravity_forces():
-    for gra in gravity_lis:
-        gra.set_force()
-
-
-def set_all_electricity_forces():
-    for ele in electricity_lis:
-        ele.set_force()
-
-
-def set_all_air_resistance_forces():
-    for m in mass_lis:
-        m.set_air_resistance_force()
-
-
 def set_all_forces():
-    set_all_spring_forces()
-    set_all_gravity_forces()
-    set_all_electricity_forces()
-    set_all_air_resistance_forces()
+    for force_lis in all_forces:
+        for f in all_forces[force_lis]:
+            for obj in f.object_list:
+                obj.set_force()
 
 
 def reflect_all():
@@ -796,16 +811,13 @@ def move_all():
 
 
 def initialize():
-    create_all_collisions()
-    create_all_gravities()
-    create_all_electricities()
+    create_all_automated_forces()
 
 
 def update():
     empty_all_forces()
     reflect_all()
     set_all_forces()
-    collide_all()
     move_all()
 
 
