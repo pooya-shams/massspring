@@ -57,13 +57,33 @@ you can create a mass object by using the mass class. you can learn more about t
 m1 = m.mass(x=0, y=0, z=0, vx=0, vy=0, vz=0, m=10, r=10, q=0, moveable=False, solid=True, bound=True, gravitational=False, resistible=False, electrical=False, conductive=False, color=(0, 255, 0), visible=True)
 ```
 
+parameters meanings are explained here.  
+parameters / attributes:
+
+- x, y, z are the object's position.  
+- vx, vy, vz are the object's velocity.
+- fx, fy, fz are the sum of forces applied to the object. they will be added by calling the set_force method in each force's object to the force's masses (m1, m2).
+- m is mass of object.
+- r is radius of object (each mass is consumed as a sphere).
+- q is electrical charge of the object.
+- moveable means if the object can move or not.
+- solid means if the object can hit other objects or not.
+- bound means if the object stays in the screen or not.
+- gravitational means if the object is affected by gravity force or not.
+- resistible means if the object is affected by air resistance force or not.
+- electrical means if the object is affected by other objects' electrical force and can affect them by electrical force or not.
+- conductive means if the object will share electrical charge with others or not.
+- color is the objects default color. visible means if the object is seen or not.
+
+
 ### force
 
-there are four types of forces (technically force subclass) you can create:  
+there are five types of forces (technically force subclass) you can create:  
 1.gravity  
 2.electricity  
 3.spring  
 4.collision  
+5.air resistance  
 
 #### gravity
 
@@ -108,6 +128,25 @@ uses the conservation of momentum and kinetic energy and the equations presented
 
 ```python
 c1 = m.collision(m1=m1, m2=m2)
+```
+
+#### air resistance
+
+the air_resistance class provides an air_resistance force for an object according to [drag equation](https://en.wikipedia.org/wiki/Drag_equation) shown bellow.  
+![drag equation](https://raw.githubusercontent.com/pooya-shams/massspring/master/massspring/images/drag.svg)  
+where:
+
+- Fd is the drag force, which is by definition the force component in the direction of the flow velocity,
+- p is the [mass density](https://en.wikipedia.org/wiki/Mass_density) of the fluid,
+- u is the [flow velocity](https://en.wikipedia.org/wiki/Flow_velocity) relative to the object,
+- A is the reference area, and
+- Cd is the [drag coefficient](https://en.wikipedia.org/wiki/Drag_coefficient) – a dimensionless coefficient related to the object's geometry and taking into account both [skin friction](https://en.wikipedia.org/wiki/Skin_friction) and [form drag](https://en.wikipedia.org/wiki/Form_drag). In general, Cd depends on the [Reynolds number](https://en.wikipedia.org/wiki/Reynolds_number).  
+
+more information is available at [Drag equation](https://en.wikipedia.org/wiki/Drag_equation) and [Drag](https://en.wikipedia.org/wiki/Drag_(physics)) wikipedia page.  
+you can manually create an air resistance force for an object using the code bellow:
+
+```python
+ar = m.air_resistance(m1=m1)
 ```
 
 ### mainloop

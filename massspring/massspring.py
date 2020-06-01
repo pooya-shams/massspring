@@ -179,7 +179,7 @@ class mass:
     parameters / attributes:
     x, y, z are the object's position.
     vx, vy, vz are the object's velocity.
-    fx, fy, fz are the sum of forces entered to the object.
+    fx, fy, fz are the sum of forces applied to the object.
         they will be added by calling the set_force method
         in each force's object to the force's masses (m1, m2).
     m is mass of object.
@@ -507,11 +507,11 @@ class spring(force):
         return self.h()
 
     def get_force(self):
-        """ calculates the force which should be entered to the masses. """
+        """ calculates the force which should be applied to the masses. """
         return - self.k * (self.length() - self.nl)
 
     def set_force(self):
-        """ enters the force to the masses. """
+        """ applies the force to the masses. """
         f = self.get_force()
         d, dx, dy, dz = self.d()
         if d == 0:
@@ -565,7 +565,7 @@ class gravity(force):
 
     def get_force(self):
         """
-        returns the force that two objects enter each other
+        returns the force that two objects apply to each other
         as gravity force according to f = G.m1.m2/r^2
         """
         h = self.h()
@@ -607,7 +607,7 @@ class electricity(force):
 
     def get_force(self):
         """
-        returns the electricity force that two charged objects enter
+        returns the electricity force that two charged objects apply to
         each other according to f = k.q1.q2/r^2
         """
         h = self.h()
@@ -724,8 +724,8 @@ class collision(force):
 class air_resistance(force):
     """
     air resistance force class
-    calculates the air resistance force entered to an object by
-    the following formula and enters that force to the object.
+    calculates the air resistance force appled to an object by
+    the following formula and applies that force to the object.
     f = (p * v^2 * C * A) / 2
     """
     object_list = air_resistance_lis
@@ -739,7 +739,7 @@ class air_resistance(force):
 
     def get_force(self):
         """
-        returns the force that is entered to the object because of
+        returns the force that is applied to the object because of
         air resistance according to f = p*v^2*C*A/2
         """
         return da * self.m1.v() ** 2 * Cd * self.m1.A() / 2
