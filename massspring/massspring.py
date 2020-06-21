@@ -16,10 +16,11 @@ you can create many types of objects from which
 
 import functools
 import warnings
-from math import pi, hypot
+from math import hypot, pi
+
+import pygame
 
 import massspring.Exceptions as Exceptions
-import pygame
 
 # variables
 # physical constants
@@ -55,6 +56,7 @@ collision_lis = []  # list of all possible collisions made by masses
 air_resistance_lis = []  # list of masses having air resistance force enabled
 same_pos_warn_message = "Objects %s and %s with indexes of %d and %d in\
  the list mass_lis are at the same position. can't set %s force to them."
+ms = "mass"
 sp = "spring"
 el = "electricity"
 gv = "gravity"
@@ -250,7 +252,7 @@ class mass:
         try:
             mass_lis.remove(self)
         except Exception as e:
-            print("[!] Error when deleting : "+str(e))
+            print(f"[Error] when deleting {ms}: {e}")
 
     def v(self):
         """ returns the velocity of the object """
@@ -404,26 +406,27 @@ class force:
     raising exceptions
     """
     object_list: list
+    name: str
 
-    def __init__(self, *, m1: mass, m2: mass = None, name: str = ""):
+    def __init__(self, *, m1: mass, m2: mass = None):
         if m2 is not None:
             assert_type_error(m1, m2,
                               preferred_type=mass,
                               name="m1 and m2",
-                              msg=f"can't set {name} force to them.")
+                              msg=f"can't set {self.name} force to them.")
         else:
             assert_type_error(m1,
                               preferred_type=mass,
                               name="m1",
-                              msg=f"can't set {name} force to it.")
+                              msg=f"can't set {self.name} force to it.")
         assert_type_error(self.object_list,
                           preferred_type=list,
                           name="object_list",
-                          msg=f"can't append a {name} force to it.")
+                          msg=f"can't append a {self.name} force to it.")
 
         self.m1 = m1
         self.m2 = m2
-        self.name = name
+        # self.name = name
         self.object_list.append(self)
 
     def __del__(self):
@@ -431,7 +434,7 @@ class force:
         try:
             self.object_list.remove(self)
         except Exception as e:
-            print("[!] Error when deleting : "+str(e))
+            print(f"[Error] when deleting {self.name}: {e}")
 
     @two_object_force
     def dx(self):
@@ -488,10 +491,11 @@ class spring(force):
     will be shown on the screen or not.
     """
     object_list = spring_lis
+    name = sp
 
     def __init__(self, m1: mass, m2: mass, k=1,
                  nl=0, color=(255, 255, 255), visible=True):
-        super().__init__(m1=m1, m2=m2, name=sp)
+        super().__init__(m1=m1, m2=m2)
         self.k = k
         self.nl = nl
         if nl == 0:
@@ -551,13 +555,14 @@ class gravity(force):
     uses the newton's law of gravity.
     """
     object_list = gravity_lis
+    name = gv
 
     def __init__(self, m1: mass, m2: mass):
         """
         parameters:
         m1 and m2: masses.
         """
-        super().__init__(m1=m1, m2=m2, name=gv)
+        super().__init__(m1=m1, m2=m2)
 
     @staticmethod
     def condition(m1: mass, m2: mass):
@@ -593,13 +598,14 @@ class electricity(force):
     the electricity force between two particles.
     """
     object_list = electricity_lis
+    name = el
 
     def __init__(self, m1: mass, m2: mass):
         """
         parameters:
         m1 and m2: masses.
         """
-        super().__init__(m1=m1, m2=m2, name=el)
+        super().__init__(m1=m1, m2=m2)
 
     @staticmethod
     def condition(m1: mass, m2: mass):
@@ -652,9 +658,10 @@ class collision(force):
     the formula and equation are driven from these two equations.
     """
     object_list = collision_lis
+    name = cl
 
     def __init__(self, m1: mass, m2: mass):
-        super().__init__(m1=m1, m2=m2, name=cl)
+        super().__init__(m1=m1, m2=m2)
 
     @staticmethod
     def condition(m1: mass, m2: mass):
@@ -729,9 +736,10 @@ class air_resistance(force):
     f = (p * v^2 * C * A) / 2
     """
     object_list = air_resistance_lis
+    name = ar
 
     def __init__(self, m1: mass):
-        super().__init__(m1=m1, name=ar)
+        super().__init__(m1=m1)
 
     @staticmethod
     def condition(m1):
