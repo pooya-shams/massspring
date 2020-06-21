@@ -75,7 +75,6 @@ parameters / attributes:
 - conductive means if the object will share electrical charge with others or not.
 - color is the objects default color. visible means if the object is seen or not.
 
-
 ### force
 
 there are five types of forces (technically force subclass) you can create:  
@@ -199,6 +198,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = '1'
 - [x] Add position checker to avoid integer too big error of pygame and python itself.
 - [x] Update the Elastic collision.
 - [ ] ~~divide massspring.py to separate modules.~~ (won't be possible because inheritance levels forces each class to import all previous classes and it results in extreme usage of memory because for example mass class and force class will be imported in each file for each force class (spring, gravity, electricity, collision) and it's inefficient)
+- [ ] Divide the program to a server and a client, the server will do physical calculations and the client will recieve them and show them on screen (will be usefull when migrating to c/c++).
 - [ ] Divide the collision to Elastic collision and Inelastic collision.
 - [ ] Create non-sphere/non-mass objects.
 - [ ] Collision between mass and spring (mass: sphere with mass, spring: line without mass).
