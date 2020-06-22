@@ -862,38 +862,42 @@ def display(DISPLAYSURF, win_xy, win_zy):
 # main loop
 
 
-def mainloop(speed=2, FPS=0, frame=None, *args):
+def mainloop(speed=2, FPS=0, frame=None, *args, displaying=True):
     assert type(speed) == int, TypeError("speed should be of type 'int'.")
     assert type(FPS) == int, TypeError("FPS should be of type 'int'.")
     assert callable(frame) or frame is None, TypeError(
         "frame should be callable.")
-    DISPLAYSURF = pygame.display.set_mode((WINW * 2 + 1, WINH))
-    win_xy = pygame.surface.Surface((WINW, WINH))
-    win_zy = pygame.surface.Surface((WINW, WINH))
+    assert type(displaying) == bool, TypeError(
+        "displaying value can be either True or False")
+    if displaying:
+        DISPLAYSURF = pygame.display.set_mode((WINW * 2 + 1, WINH))
+        win_xy = pygame.surface.Surface((WINW, WINH))
+        win_zy = pygame.surface.Surface((WINW, WINH))
     frame_number = 0
     frames_passing_speed = 1
     updating = True
     initialize()
     while True:
-        frame_number += frames_passing_speed
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                return 0
-            elif e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_SPACE:
-                    updating = not updating
-                elif e.key == pygame.K_ESCAPE:
+        if displaying:
+            frame_number += frames_passing_speed
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
                     pygame.quit()
                     return 0
-            elif e.type == pygame.MOUSEBUTTONDOWN:
-                updating = not updating
-        if FPS != 0:
-            pygame.time.Clock().tick(FPS)
+                elif e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_SPACE:
+                        updating = not updating
+                    elif e.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        return 0
+                elif e.type == pygame.MOUSEBUTTONDOWN:
+                    updating = not updating
+            if FPS != 0:
+                pygame.time.Clock().tick(FPS)
+            if frame_number % speed == 0:
+                display(DISPLAYSURF, win_xy, win_zy)
+                pygame.display.update()
         if updating:
             update()
             if frame is not None:
                 frame(*args)
-        if frame_number % speed == 0:
-            display(DISPLAYSURF, win_xy, win_zy)
-            pygame.display.update()
