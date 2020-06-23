@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-# -- In the name of god --
-# Project : massspring (mass+spring)
-# Author : Pooya.Sh.K
+# -- In the name of God --
+# Project: massspring (mass+spring)
+# File: massspring.py
+# Author: Pooya Shams kolahi
 # Inspired by Saeed Sarkarati
 
 """
@@ -765,12 +766,16 @@ class air_resistance(force):
 
 
 # other variables
+# name of all forces kinds
 automated = "automated"
 manual = "manual"
 one_forced = "one forced"
+# lists containing all types of forces from that kind
 automated_two_object_forces = [gravity, electricity, collision]
 automated_one_object_forces = [air_resistance]
 manual_two_object_forces = [spring]
+# a dictionary containing them all.
+# the keys are the list names and the values are the lists.
 all_forces = {
     automated: automated_two_object_forces,
     one_forced: automated_one_object_forces,
