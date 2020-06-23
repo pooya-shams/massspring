@@ -158,7 +158,7 @@ def start_server_mainloop(
     # setting up the main program thread. if this thread finishes,
     # all of the other threads will be killed or forced to stop.
     massspring_mainloop_thread = threading.Thread(
-        target=massspring.mainloop, args=massspring_mainloop_args)
+        target=massspring.mainloop, args=massspring_mainloop_args, kwargs=massspring_mainloop_kwargs)
     massspring_mainloop_thread.start()
     # the list containing all threads created when answering clients
     thread_list = []
