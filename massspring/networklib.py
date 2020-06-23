@@ -99,12 +99,22 @@ def analyse_request(request: bytes, mass_lis: list = None, spring_lis: list = No
     # just the default request analyser. we wont use this function in
     # this module but it can be used by users and be passed to the
     # handle_client function as a request analyser.
-    response: bytes = null
+    response = b''
     print("request is: ", request)
-    if request == msb:
-        response = encode_mass_poses(mass_lis)
-    elif request == spb:
-        response = encode_spring_poses(spring_lis)
+    # fast and hacky implemention for the 2nd solution in issue #2
+    # just spliting the bytes object by the default delimiter
+    # TODO: make the delimiter choosable by the user
+    reqlist = request.split(b'|')
+    # now checking if any of the possible requests are in the list or not
+    # note that if there is something in the list that is not supported,
+    # it will just be ignored.
+    if msb in reqlist:
+        response += encode_mass_poses(mass_lis)
+    if spb in reqlist:
+        response += encode_spring_poses(spring_lis)
+    # if there was nothing to be sent, null will be sent
+    if response == b'':
+        response += null
     print("answer is", response)
     return response
 
