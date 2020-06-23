@@ -161,6 +161,33 @@ arguments are:
 m.mainloop(speed=2, FPS=0, frame=None, *args)
 ```
 
+### network
+
+in version 1.2.0 there is a new functionality available instead of mainloop. in the new `networklib.py` file you can find a bunch of functions that can help in running your massspring-based module through network. some of them are explained bellow.
+
+#### start_server_mainloop
+
+this function is the main function that you run instead of massspring.mainloop and runs the mainloop just like massspring.mainloop does but with a little difference that now it is available through the network. you can pass it a couple of arguments that control how it works.  
+the first three are related to massspring: the massspring module that you imported and used yourself, the args to the mainloop under that massspring module which is called inside this function, and also kwargs to the mainloop.  
+the fourth argument is a function called client_handler it lets you define your own function that will be used to communicate over the net. However you can use the predefined functions in networklib too.  
+the last two arguments are the host and port which are going to be used for the server socket to bind to. if set to None, the default host name and port are gonna be used which are "localhost:7783".
+
+#### handle_client
+
+this function is the default client handler suggested by networklib.  
+handle_client takes two arguments itself: the client socket which is going to be used to communicate to the clients connecting to the server, and a request analyser function that takes the requests sent from clients and returns the desired answer.  
+However, you might have noticed that according to the type hints in the start_server_mainloop taking two arguments is not allowed, so there is also a wrapper function called *handle_client_wrapper* that returns a function that works just like handle_client but takes just one argument which is the client socket and uses the request analyser passed into the wrapper as the second argument for handle_client.  
+
+#### analyse_request
+
+analyse_request is the default request analyser suggested by networklib.  
+it takes three arguments (which are not allowed in the handle_client function but there is also a wrapper for that too): the request that came from client socket, the mass_lis and the spring_lis from massspring.  
+the handle client just accepts functions that take one argument and can not use this analyse_request function so there is a wrapper function called *analyse_request_wrapper* that takes two arguments, mass_lis and spring_lis, and returns a function that takes just one argument, the request, and uses analyse_request with the mass_lis and spring_lis passed to the wrapper function.
+
+#### encode/decode mass/spring positions
+
+these functions are the default functions used by analyse_request to encode/decode all the mass/spring positions into a *bytes object/ list of positions* which will be sent to clients and decoded by them.
+
 ## examples
 
 You can see a simple example of using massspring library to create a pendulum.
@@ -183,7 +210,7 @@ available at [example 2](https://github.com/pooya-shams/massspring-examples/blob
 ## Requirements
 
 python >= 3.6  
-pygame >= 1.9.2
+pygame >= 1.9.2  
 Note: if you want to hide the pygame support message, place this code before importing massspring.
 
 ```python
