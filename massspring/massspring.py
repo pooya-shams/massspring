@@ -26,23 +26,31 @@ import massspring.Exceptions as Exceptions
 # variables
 # physical constants
 # dt is delta time -> time difference between two sections; measured in seconds.
+#      value: 0.001
 # G is newtonian constant of gravitation; measured in m^3*kg^-1*s^-2 or
-#     N*m^2*kg^-2 where m is meters, kg is kilograms, s is seconds, N is newtons.
+#   N*m^2*kg^-2 where m is meters, kg is kilograms, s is seconds, N is newtons.
+#       value: 6.67384e-11
 # e0 is vacuum permittivity; measured in m^-2*N^-1*C^2 where m is meters,
-#     N is newton, C is coulomb.
+#   N is newton, C is coulomb.
+#       value: 8.854187817e-12
 # k is coulomb constant(electrostatic constant); measured in m^2*N*C^-2
-#     where m is meters, N is newton, C is coulomb.
+#   where m is meters, N is newton, C is coulomb.
+#       value: 1 / (4 * pi * e0) = 8987551787.997911
 # Cd is drag coefficient -> 0.47 for sphere; non-united
+#       value: 0.47
 # da is ro -> density of air; measured in kg*m^-3
-#     where kg is kilograms, m is meters.
+#   where kg is kilograms, m is meters.
+#       value: 1.2
 # ge is earth's gravity acceleration; measured in m*s^-2.
+#       value: 9.8
 # c is speed of light; measured in m/s where m is meters and s is seconds
-#     will be used to check if a mass has exceeded speed limit and raise an error
+#   will be used to check if a mass has exceeded speed limit and raise an error
+#       value: 299792458
 
 dt = .001
 G = 6.67384e-11
-e0 = 8.854187817e-12
-k = 1 / (4 * pi * e0)
+# e0 = 8.854187817e-12
+k = 8987551787.997911  # 1 / (4 * pi * e0)
 Cd = .47
 da = 1.2
 ge = 9.8
@@ -63,8 +71,8 @@ el = "electricity"
 gv = "gravity"
 cl = "collision"
 ar = "air resistance"
-INT_MIN = -2 ** 31  # -2147483648
-INT_MAX = 2 ** 31 - 1  # +2147483647
+INT_MIN = -2147483648  # -2 ** 31
+INT_MAX = +2147483647  # 2 ** 31 - 1
 
 
 # graphical variables
