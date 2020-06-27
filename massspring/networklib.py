@@ -32,6 +32,7 @@ sp = "spring"
 msb = b"mass"
 spb = b"spring"
 null = b'\0'
+exit_commands = [b'exit', b'quit']
 default_host = "127.0.0.1"  # localhost
 default_port = 7783  # fun fact: ord("M") == 77 && ord("S") == 83; (MassSpring)
 buffsize = 255
@@ -100,7 +101,6 @@ def analyse_request(request: bytes, mass_lis: list = None, spring_lis: list = No
     # this module but it can be used by users and be passed to the
     # handle_client function as a request analyser.
     response = b''
-    print("request is: ", request)
     # fast and hacky implemention for the 2nd solution in issue #2
     # just spliting the bytes object by the default delimiter
     # TODO: make the delimiter choosable by the user
@@ -115,7 +115,6 @@ def analyse_request(request: bytes, mass_lis: list = None, spring_lis: list = No
     # if there was nothing to be sent, null will be sent
     if response == b'':
         response += null
-    print("answer is", response)
     return response
 
 
@@ -129,17 +128,24 @@ def analyse_request_wrapper(mass_lis: list, spring_lis: list):
     return wrapped_request_analyser
 
 
-def handle_client(client_socket: socket.socket, request_analyser: typing.Callable) -> None:
+def handle_client(client_socket: socket.socket, addr: typing.Iterable, request_analyser: typing.Callable) -> None:
     """
     handles the client socket by receiving it's query
     and returning what it asked for in return.
     """
-    closed = False
-    while not closed:
-        request = client_socket.recv(buffsize)
-        print("[INFO] Received: %s" % request)
-        data = request_analyser(request)
-        client_socket.send(data)
+    try:
+        while True:
+            request = client_socket.recv(buffsize)
+            # exits if the clients asks by sending 'exit' or 'quit'
+            if request in exit_commands:
+                client_socket.close()
+                break
+            data = request_analyser(request)
+            client_socket.send(data)
+    # client closed the connection
+    except BrokenPipeError:
+        print(
+            f"[ERROR] connection with {addr[0]}:{addr[1]} closed unexpectedly: Broken Pipe.")
 
 
 def handle_client_wrapper(request_analyser: typing.Callable) -> typing.Callable:
@@ -147,8 +153,8 @@ def handle_client_wrapper(request_analyser: typing.Callable) -> typing.Callable:
     a wrapper for the handle_client function mentioned earlier which will
     return a function that just gets the client_socket as an argument.
     """
-    def wrapped_client_handler(client_socket: socket.socket) -> None:
-        return handle_client(client_socket, request_analyser)
+    def wrapped_client_handler(client_socket: socket.socket, addr: typing.Iterable) -> None:
+        return handle_client(client_socket, addr, request_analyser)
     return wrapped_client_handler
 
 
@@ -178,7 +184,7 @@ def start_server_mainloop(
         print("[INFO] Accepted connection from: %s:%d" % (addr[0], addr[1]))
         # setting up the client handling thread
         client_handler_thread = threading.Thread(
-            target=client_handler, args=(client, ))
+            target=client_handler, args=(client, addr))
         client_handler_thread.daemon = True
         # this thread will die immediately when the program exits
         client_handler_thread.start()
