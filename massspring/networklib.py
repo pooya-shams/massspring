@@ -35,7 +35,7 @@ null = b'\0'
 exit_commands = [b'exit', b'quit']
 default_host = "127.0.0.1"  # localhost
 default_port = 7783  # fun fact: ord("M") == 77 && ord("S") == 83; (MassSpring)
-buffsize = 255
+buffsize = 256
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
@@ -69,7 +69,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def decode_mass_poses(response: bytes) -> list:
     """ gets the "bytes" object and returns a list of all positions """
     resp = response.decode().rsplit()
-    ms_ls = [None]*len(resp)
+    ms_ls = [None] * len(resp)
     for i, line in enumerate(resp):
         ms_ls[i] = list(map(int, map(float, line.split(','))))
     return ms_ls
@@ -85,7 +85,7 @@ def encode_mass_poses(mass_lis: list) -> bytes:
 
 def encode_spring_poses(spring_lis: list) -> bytes:
     """ gets a list of all positions and returns the "bytes" object """
-    resp = sp+'\n'
+    resp = sp + '\n'
     for s in spring_lis:
         resp += ','.join(map(str, (s.m1.x, s.m1.y, s.m1.z))) + \
             ';' + ','.join(map(str, (s.m2.x, s.m2.y, s.m2.z))) + '\n'
@@ -103,7 +103,9 @@ def analyse_request(request: bytes, mass_lis: list = None, spring_lis: list = No
     response = b''
     # fast and hacky implemention for the 2nd solution in issue #2
     # just spliting the bytes object by the default delimiter
-    # TODO: make the delimiter choosable by the user
+    # TODO: make the delimiter decidable by the user
+    # TODO: change the approaches used in analysing requests and try to make it
+    # more general to use and more secure ways to implement them.
     reqlist = request.split(b'|')
     # now checking if any of the possible requests are in the list or not
     # note that if there is something in the list that is not supported,
@@ -132,20 +134,31 @@ def handle_client(client_socket: socket.socket, addr: typing.Iterable, request_a
     """
     handles the client socket by receiving it's query
     and returning what it asked for in return.
+    it runs in an infinite loop and receives the request and sends TWO respones to them:
+    - the first one is the length of the actual response returned from
+    request_analyser with a newline character at the end of it
+    - the second one is the actual respone itself.
+    as far as I know they won't get mixed together so that the client can do a socket.recv
+    with 256 as buffersize and use the length to do another recv.
     """
     try:
         while True:
+            # receiving the request asked by the client maxlength is 256.
             request = client_socket.recv(buffsize)
-            # exits if the clients asks by sending 'exit' or 'quit'
+            # exits and closes the connection if the clients asks so by sending 'exit' or 'quit'
             if request in exit_commands:
                 client_socket.close()
                 break
+            # processing the received request
             data = request_analyser(request)
+            assert type(data) == bytes, TypeError("'request_analyser' should return bytes")
+            length = str(len(data)) + '\n'
+            # sending it
+            client_socket.send(length.encode())
             client_socket.send(data)
-    # client closed the connection
+    # client closed the connection after receiving the whole response
     except BrokenPipeError:
-        print(
-            f"[ERROR] connection with {addr[0]}:{addr[1]} closed unexpectedly: Broken Pipe.")
+        print(f"[ERROR] connection with {addr[0]}:{addr[1]} closed unexpectedly: Broken Pipe.")
 
 
 def handle_client_wrapper(request_analyser: typing.Callable) -> typing.Callable:
@@ -173,6 +186,7 @@ def start_server_mainloop(
     server.listen(5)
     # setting up the main program thread. if this thread finishes,
     # all of the other threads will be killed or forced to stop.
+    # TODO: implement this line ( ^ ) properly.
     massspring_mainloop_thread = threading.Thread(
         target=massspring.mainloop, args=massspring_mainloop_args, kwargs=massspring_mainloop_kwargs)
     massspring_mainloop_thread.start()
