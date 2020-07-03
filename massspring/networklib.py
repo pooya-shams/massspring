@@ -149,6 +149,8 @@ def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Ca
     used to process it.
     yields bytes objects.
     """
+    assert type(request) == bytes, TypeError("'request' should be bytes")
+    assert type(information) == dict, TypeError("'information' should be dictionary")
     assert type(delimiter) == bytes and len(delimiter) == 1, ValueError("'delimiter' must be bytes object of length 1")
     reqlist = request.split(delimiter)
     for req in reqlist:
