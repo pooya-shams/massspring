@@ -168,13 +168,13 @@ def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Ca
             warnings.warn(Warning("the request %s is not in the 'information' dictionary" % req))
 
 
-def analyse_request_wrapper(mass_lis: list, spring_lis: list):
+def analyse_request_wrapper(information: typing.Mapping[bytes, typing.Callable], delimiter: bytes = b'|'):
     """
     a wrapper for the analyse_request function mentioned earlier which
     will return a function that just gets the request as an argument.
     """
     def wrapped_request_analyser(request: bytes):
-        return analyse_request(request, mass_lis, spring_lis)
+        return analyse_request(request, information, delimiter)
     return wrapped_request_analyser
 
 
