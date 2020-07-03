@@ -19,11 +19,11 @@ foundations of the whole massspring library.
 """
 
 import socket
+import sys
 import threading
 import types
 import typing
-import sys
-
+import warnings
 
 # Variables
 
@@ -92,31 +92,28 @@ def encode_spring_poses(spring_lis: list) -> bytes:
     return resp.encode()
 
 
-def analyse_request(request: bytes, mass_lis: list = None, spring_lis: list = None) -> bytes:
+def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Callable], delimiter: bytes = b'|') -> bytes:
     """
-    receives the request as a "bytes" object and
-    decides which encoder will be used to send data
+    analyse_request is just the default request analyser. we wont use this function in
+    this module but it can be used by users and be passed to the handle_client function
+    as a request analyser.
+    receives the request as a "bytes" object, extracts all requests from it and
+    decides which analyser function provided in information dictionary will be
+    used to process it.
     """
-    # just the default request analyser. we wont use this function in
-    # this module but it can be used by users and be passed to the
-    # handle_client function as a request analyser.
+    assert type(delimiter) == bytes and len(delimiter) == 1, ValueError("'delimiter' must be bytes object of length 1")
+    reqlist = request.split(delimiter)
     response = b''
-    # fast and hacky implemention for the 2nd solution in issue #2
-    # just spliting the bytes object by the default delimiter
-    # TODO: make the delimiter decidable by the user
-    # TODO: change the approaches used in analysing requests and try to make it
-    # more general to use and more secure ways to implement them.
-    reqlist = request.split(b'|')
-    # now checking if any of the possible requests are in the list or not
-    # note that if there is something in the list that is not supported,
-    # it will just be ignored.
-    if msb in reqlist:
-        response += encode_mass_poses(mass_lis)
-    if spb in reqlist:
-        response += encode_spring_poses(spring_lis)
-    # if there was nothing to be sent, null will be sent
-    if response == b'':
-        response += null
+    for req in reqlist:
+        if req in information:
+            func = information[req]
+            assert callable(func), TypeError("'information' values should be callable.")
+            ans: bytes = func()
+            assert type(ans) == bytes, ValueError("'information' values should return bytes object.")
+            ans = ans.strip()
+            response += ans + b'\n'
+        else:
+            warnings.warn(Warning("the request %s is not in the 'information' dictionary" % req))
     return response
 
 
