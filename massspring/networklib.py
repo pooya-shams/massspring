@@ -149,9 +149,9 @@ def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Ca
     used to process it.
     yields bytes objects.
     """
-    assert type(request) == bytes, TypeError("'request' should be bytes")
-    assert type(information) == dict, TypeError("'information' should be dictionary")
-    assert type(delimiter) == bytes and len(delimiter) == 1, ValueError("'delimiter' must be bytes object of length 1")
+    assert isinstance(request, bytes), TypeError("'request' should be bytes")
+    assert isinstance(information, dict), TypeError("'information' should be dictionary")
+    assert isinstance(delimiter, bytes) and len(delimiter) == 1, ValueError("'delimiter' must be bytes object of length 1")
     reqlist = request.split(delimiter)
     for req in reqlist:
         if req in exit_commands:
@@ -161,7 +161,7 @@ def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Ca
             func = information[req]
             assert callable(func), TypeError("'information' values should be callable.")
             ans: bytes = func()
-            assert type(ans) == bytes, ValueError("'information' values should return bytes object.")
+            assert isinstance(ans, bytes), ValueError("'information' values should return bytes object.")
             ans = ans.strip()
             yield ans
         else:
@@ -180,8 +180,8 @@ def analyse_request_wrapper(information: typing.Mapping[bytes, typing.Callable],
 
 def send(soc: socket.socket, data: bytes):
     """ sends data properly and safely """
-    assert type(soc) == socket.socket, TypeError("'soc' should be socket.socket")
-    assert type(data) == bytes, TypeError("'data' should be bytes")
+    assert isinstance(soc, socket.socket), TypeError("'soc' should be socket.socket")
+    assert isinstance(data, bytes), TypeError("'data' should be bytes")
     length = str(len(data)).encode()
     soc.send(length)
     return soc.send(data)

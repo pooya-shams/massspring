@@ -104,8 +104,7 @@ def assert_type_error(*objects, preferred_type=None, name="", msg=""):
     makes sure that all the objects passed
     to the function are of preferred type
     """
-    assert all(map(lambda obj: type(obj) == preferred_type, objects)), TypeError(
-        f"object {name} -> {objects} should all be of type '{preferred_type}' not '{list(map(type, objects))}'.{msg} ")
+    assert all(map(lambda obj: isinstance(obj, preferred_type), objects)), TypeError(f"object {name} -> {objects} should all be of type '{preferred_type}' not '{list(map(type, objects))}'.{msg} ")
 
 
 def similarity(dx1, dy1, dz1, d1, d2):
@@ -876,11 +875,11 @@ def display(DISPLAYSURF, win_xy, win_zy):
 
 
 def mainloop(speed=2, FPS=0, frame=None, *args, displaying=True):
-    assert type(speed) == int, TypeError("speed should be of type 'int'.")
-    assert type(FPS) == int, TypeError("FPS should be of type 'int'.")
+    assert isinstance(speed, int), TypeError("speed should be of type 'int'.")
+    assert isinstance(FPS, int), TypeError("FPS should be of type 'int'.")
     assert callable(frame) or frame is None, TypeError(
         "frame should be callable.")
-    assert type(displaying) == bool, TypeError(
+    assert isinstance(displaying, bool), TypeError(
         "displaying value can be either True or False")
     if displaying:
         DISPLAYSURF = pygame.display.set_mode((WINW * 2 + 1, WINH))
