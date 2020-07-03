@@ -66,15 +66,6 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # please note that like the mass encoder there are no whitespaces in the lines
 # in order to reduce the size of transferred data to the lowest possible.
 
-def decode_mass_poses(response: bytes) -> list:
-    """ gets the "bytes" object and returns a list of all positions """
-    resp = response.decode().rsplit()
-    ms_ls = [None] * len(resp)
-    for i, line in enumerate(resp):
-        ms_ls[i] = list(map(int, map(float, line.split(','))))
-    return ms_ls
-
-
 def encode_mass_poses(mass_lis: list) -> bytes:
     """ gets a list of all positions and returns the "bytes" object """
     resp = ms + '\n'
@@ -90,6 +81,62 @@ def encode_spring_poses(spring_lis: list) -> bytes:
         resp += ','.join(map(str, (s.m1.x, s.m1.y, s.m1.z))) + \
             ';' + ','.join(map(str, (s.m2.x, s.m2.y, s.m2.z))) + '\n'
     return resp.encode()
+
+
+def decode_mass_poses(response: bytes) -> list:
+    """
+    gets the "bytes" object and returns a list of
+    all positions of masses included in it.
+    """
+    resp = response.decode().rsplit()
+    ms_ls = [None] * (len(resp) - 1)
+    for i, line in enumerate(resp[1:]):
+        ms_ls[i] = list(map(float, line.split(',')))
+    return ms_ls
+
+
+def decode_spring_poses(response: bytes) -> list:
+    """
+    gets the "bytes" object and returns a list of
+    all positions of springs included in it.
+    """
+    resp = response.decode().rsplit()
+    sp_ls = [None] * (len(resp) - 1)
+    for i, line in enumerate(resp[1:]):
+        m1m, m2m = line.split(';')
+        m1 = list(map(float, m1m.split(',')))
+        m2 = list(map(float, m2m.split(',')))
+        sp_ls[i] = [m1, m2]
+    return sp_ls
+
+
+def decode_mass_spring_poses(response: bytes) -> list:
+    """
+    gets the "bytes" object and returns results of
+    decode_mass_poses and decode_spring_poses.
+    it relies on the fact that there is a 'mass' and 'spring'
+    in the beginning of the sequence of masses and springs.
+    this function will be deprecated after fixing issue #6,
+    possibley with the second approach. but if the first approach
+    is used then this kind of splitting might become helpful.
+    """
+    idx1 = response.find(b"mass")
+    idx2 = response.find(b"spring")
+    if idx1 == -1:
+        raise ValueError("No mass found in response")
+    if idx2 == -1:
+        raise ValueError("No spring found in response")
+    mass_resp: bytes
+    spring_resp: bytes
+    if idx1 < idx2:
+        mass_resp = response[idx1:idx2]
+        spring_resp = response[idx2:]
+    else:
+        spring_resp = response[idx1:idx2]
+        mass_resp = response[idx2:]
+    mass_lis = decode_mass_poses(mass_resp)
+    spring_lis = decode_spring_poses(spring_resp)
+    return mass_lis, spring_lis
 
 
 def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Callable], delimiter: bytes = b'|') -> bytes:
