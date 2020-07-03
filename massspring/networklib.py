@@ -139,7 +139,7 @@ def decode_mass_spring_poses(response: bytes) -> list:
     return mass_lis, spring_lis
 
 
-def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Callable], delimiter: bytes = b'|') -> bytes:
+def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Callable], delimiter: bytes = b'|'):
     """
     analyse_request is just the default request analyser. we wont use this function in
     this module but it can be used by users and be passed to the handle_client function
@@ -147,21 +147,23 @@ def analyse_request(request: bytes, information: typing.Mapping[bytes, typing.Ca
     receives the request as a "bytes" object, extracts all requests from it and
     decides which analyser function provided in information dictionary will be
     used to process it.
+    yields bytes objects.
     """
     assert type(delimiter) == bytes and len(delimiter) == 1, ValueError("'delimiter' must be bytes object of length 1")
     reqlist = request.split(delimiter)
-    response = b''
     for req in reqlist:
-        if req in information:
+        if req in exit_commands:
+            yield req
+            # this will later cause handle_client to exit
+        elif req in information:
             func = information[req]
             assert callable(func), TypeError("'information' values should be callable.")
             ans: bytes = func()
             assert type(ans) == bytes, ValueError("'information' values should return bytes object.")
             ans = ans.strip()
-            response += ans + b'\n'
+            yield ans
         else:
             warnings.warn(Warning("the request %s is not in the 'information' dictionary" % req))
-    return response
 
 
 def analyse_request_wrapper(mass_lis: list, spring_lis: list):
@@ -172,6 +174,21 @@ def analyse_request_wrapper(mass_lis: list, spring_lis: list):
     def wrapped_request_analyser(request: bytes):
         return analyse_request(request, mass_lis, spring_lis)
     return wrapped_request_analyser
+
+
+def send(soc: socket.socket, data: bytes):
+    """ sends data properly and safely """
+    assert type(soc) == socket.socket, TypeError("'soc' should be socket.socket")
+    assert type(data) == bytes, TypeError("'data' should be bytes")
+    length = str(len(data)).encode()
+    soc.send(length)
+    return soc.send(data)
+
+
+def recv(soc: socket.socket):
+    """ receives data properly and safely """
+    length = int(soc.recv(buffsize).decode())
+    return soc.recv(length)
 
 
 def handle_client(client_socket: socket.socket, addr: typing.Iterable, request_analyser: typing.Callable) -> None:
@@ -187,21 +204,19 @@ def handle_client(client_socket: socket.socket, addr: typing.Iterable, request_a
     """
     try:
         while True:
-            # receiving the request asked by the client maxlength is 256.
-            request = client_socket.recv(buffsize)
-            # exits and closes the connection if the clients asks so by sending 'exit' or 'quit'
-            if request in exit_commands:
-                client_socket.close()
-                break
+            # receiving the request asked by the client maxlength should be specified
+            # by client in a message with maxlength 256.
+            request = recv(client_socket)
             # processing the received request
             data = request_analyser(request)
-            assert type(data) == bytes, TypeError("'request_analyser' should return bytes")
-            length = str(len(data)) + '\n'
-            # sending it
-            client_socket.send(length.encode())
-            client_socket.send(data)
-    # client closed the connection after receiving the whole response
+            for resp in data:
+                # checking if we should exit
+                if resp in exit_commands:
+                    return
+                # sending the received data
+                send(client_socket, resp)
     except BrokenPipeError:
+        # client closed the connection after receiving the whole response
         print(f"[ERROR] connection with {addr[0]}:{addr[1]} closed unexpectedly: Broken Pipe.")
 
 
